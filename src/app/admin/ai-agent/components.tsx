@@ -39,13 +39,29 @@ export function AiAgentClient({ tenant }: { tenant: any }) {
     }
   }
 
-  const handleConnectWhatsApp = () => {
+  const handleConnectWhatsApp = async () => {
     setWpStatus('connecting')
-    // Simular chamada a UAZAPI para pegar QRCode
-    setTimeout(() => {
-      // Mock de QR Code
-      setQrCodeUrl('https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=MockQRCodeDataParaWhatsApp')
-    }, 1500)
+    try {
+      const res = await fetch('/api/whatsapp/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenantId: tenant.id })
+      })
+      const data = await res.json()
+      
+      if (data.qrcode) {
+        // Base64 já formatado ou precisa adicionar o cabeçalho
+        const qrImage = data.qrcode.startsWith('data:image') ? data.qrcode : `data:image/png;base64,${data.qrcode}`
+        setQrCodeUrl(qrImage)
+      } else {
+        alert(data.message || data.error || 'Erro ao gerar QR Code.')
+        setWpStatus('disconnected')
+      }
+    } catch (error) {
+      console.error(error)
+      alert('Erro na conexão com UAZAPI.')
+      setWpStatus('disconnected')
+    }
   }
 
   const handleSendMessage = (e: React.FormEvent) => {

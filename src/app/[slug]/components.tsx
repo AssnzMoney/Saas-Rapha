@@ -110,6 +110,8 @@ function CheckoutModal({ tenantId, onClose }: { tenantId: string, onClose: () =>
   const [address, setAddress] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('PIX') // PIX, CARD, CASH
 
+  const [pixData, setPixData] = useState<{qrCode: string, qrCodeBase64: string} | null>(null)
+
   const total = totalPrice()
 
   async function handleCheckout(e: React.FormEvent) {
@@ -127,12 +129,66 @@ function CheckoutModal({ tenantId, onClose }: { tenantId: string, onClose: () =>
     })
     
     if (result.success) {
+      if (paymentMethod === 'PIX') {
+        try {
+          const mpRes = await fetch('/api/checkout/pix', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              tenantId,
+              orderId: result.orderId,
+              total,
+              customerName: name
+            })
+          })
+          const mpData = await mpRes.json()
+          if (mpData.qrCodeBase64) {
+            setPixData({ qrCode: mpData.qrCode, qrCodeBase64: mpData.qrCodeBase64 })
+            setLoading(false)
+            return
+          } else {
+            alert('Erro ao gerar PIX: ' + (mpData.error || 'Tente novamente.'))
+          }
+        } catch (err) {
+          console.error(err)
+          alert('Erro ao processar pagamento.')
+        }
+      }
+
       setSuccess(true)
       clearCart()
     } else {
       alert(result.error || 'Erro ao processar pedido.')
       setLoading(false)
     }
+  }
+
+  if (pixData) {
+    return (
+      <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-4">
+        <div className="bg-white w-full max-w-md rounded-2xl p-6 relative flex flex-col items-center text-center">
+          <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-4">
+            <CheckCircle className="w-8 h-8" />
+          </div>
+          <h2 className="text-2xl font-bold mb-2">Pedido Criado!</h2>
+          <p className="text-neutral-500 mb-6">Escaneie o QR Code abaixo no app do seu banco para pagar.</p>
+          
+          <img src={`data:image/jpeg;base64,${pixData.qrCodeBase64}`} alt="QR Code PIX" className="w-48 h-48 mb-4 border border-neutral-200 rounded-xl p-2" />
+          
+          <div className="w-full bg-neutral-50 p-4 rounded-xl border border-neutral-200 flex flex-col space-y-2 mb-6 text-left overflow-hidden">
+            <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Pix Copia e Cola</span>
+            <span className="text-sm text-neutral-800 break-all">{pixData.qrCode}</span>
+          </div>
+
+          <button 
+            onClick={() => { setPixData(null); onClose(); clearCart(); }}
+            className="w-full bg-emerald-500 text-white rounded-xl py-4 font-bold text-lg hover:bg-emerald-600 transition-colors"
+          >
+            Já Paguei!
+          </button>
+        </div>
+      </div>
+    )
   }
 
   if (success) {
