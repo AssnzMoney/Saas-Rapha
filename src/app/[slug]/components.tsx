@@ -168,7 +168,7 @@ function CheckoutModal({ tenantId, onClose }: { tenantId: string, onClose: () =>
       <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-4">
         <div className="bg-white w-full max-w-md rounded-2xl p-6 relative flex flex-col items-center text-center">
           <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-4">
-            <CheckCircle className="w-8 h-8" />
+            <CheckCircle2 className="w-8 h-8" />
           </div>
           <h2 className="text-2xl font-bold mb-2">Pedido Criado!</h2>
           <p className="text-neutral-500 mb-6">Escaneie o QR Code abaixo no app do seu banco para pagar.</p>
