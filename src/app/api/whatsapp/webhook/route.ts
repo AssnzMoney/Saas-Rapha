@@ -116,6 +116,17 @@ export async function POST(req: Request) {
       }
     }
 
+    if (body.event === 'connection.update' || body.event === 'CONNECTION_UPDATE') {
+      const instanceName = body.instance
+      const state = body.data?.state || body.data?.instance?.state
+
+      if (instanceName && state) {
+        const status = state === 'open' ? 'connected' : 'disconnected'
+        const supabase = await createClient()
+        await supabase.from('tenants').update({ whatsapp_status: status }).eq('id', instanceName)
+      }
+    }
+
     return NextResponse.json({ ok: true })
   } catch (error: any) {
     console.error('Webhook erro:', error)

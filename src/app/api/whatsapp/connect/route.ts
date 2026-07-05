@@ -18,6 +18,16 @@ export async function POST(req: Request) {
 
     const instanceName = tenantId // O nome da instância será o próprio ID do tenant
 
+    const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://sua-url-railway.up.railway.app'
+
+    // 0. Deletar instância se ela já existir para evitar lixo de estado e limites excedidos
+    try {
+      await fetch(`${UAZAPI_URL}/instance/delete/${instanceName}`, {
+        method: 'DELETE',
+        headers: { 'admintoken': UAZAPI_KEY }
+      })
+    } catch(e) {}
+
     // 1. Criar a instância na UAZAPI (Evolution API)
     const createRes = await fetch(`${UAZAPI_URL}/instance/create`, {
       method: 'POST',
@@ -30,13 +40,24 @@ export async function POST(req: Request) {
         Name: instanceName,
         name: instanceName,
         qrcode: true,
-        integration: 'WHATSAPP-BAILEYS'
+        integration: 'WHATSAPP-BAILEYS',
+        webhook_url: `${APP_URL}/api/whatsapp/webhook`,
+        webhook: `${APP_URL}/api/whatsapp/webhook`,
+        events: ['MESSAGES_UPSERT', 'CONNECTION_UPDATE']
       })
     })
 
-    console.log('--- RESPOSTA CREATE DA UAZAPI ---')
     const createBody = await createRes.text()
-    console.log(createBody)
+    
+    // Tratamento específico de limite de instâncias da UAZAPI
+    if (createRes.status === 429) {
+      return NextResponse.json({ error: 'Limite de instâncias atingido na sua conta UAZAPI. Por favor, acesse o painel da UAZAPI e exclua instâncias antigas antes de conectar.' }, { status: 429 })
+    }
+    
+    // Outros erros na criação da instância
+    if (!createRes.ok && createRes.status !== 403 && !createBody.includes('already exists')) {
+      return NextResponse.json({ error: `Erro da UAZAPI: ${createBody}` }, { status: 400 })
+    }
     
     // Tentar extrair o token da instância caso a UAZAPI retorne
     let instanceToken = UAZAPI_KEY
@@ -45,24 +66,6 @@ export async function POST(req: Request) {
       if (parsedCreate.hash?.apikey) instanceToken = parsedCreate.hash.apikey
       if (parsedCreate.token) instanceToken = parsedCreate.token
     } catch(e) {}
-
-    // 2. Configurar o Webhook
-    const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://sua-url-railway.up.railway.app'
-    
-    await fetch(`${UAZAPI_URL}/webhook/set/${instanceName}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'admintoken': UAZAPI_KEY,
-        'token': instanceToken
-      },
-      body: JSON.stringify({
-        url: `${APP_URL}/api/whatsapp/webhook`,
-        webhookByEvents: false,
-        webhookBase64: false,
-        events: ['MESSAGES_UPSERT']
-      })
-    })
 
     // 3. Obter o Base64 do QR Code
     const qrRes = await fetch(`${UAZAPI_URL}/instance/connect`, {
@@ -82,9 +85,12 @@ export async function POST(req: Request) {
     let qrData: any = {}
     try { qrData = JSON.parse(qrText) } catch (e) {}
 
-    // Atualizar no banco de dados
+    // Atualizar no banco de dados (salvando o token para polling sem webhook)
     const supabase = await createClient()
-    await supabase.from('tenants').update({ uazapi_instance_key: instanceName }).eq('id', tenantId)
+    await supabase.from('tenants').update({ 
+      uazapi_instance_key: instanceName,
+      uazapi_instance_token: instanceToken
+    }).eq('id', tenantId)
 
     const base64Code = qrData.base64 || qrData.qrcode?.base64 || (typeof qrData.qrcode === 'string' ? qrData.qrcode : null) || qrData.instance?.qrcode
 

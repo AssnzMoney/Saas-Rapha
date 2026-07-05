@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
-import { saveAiSettings } from './actions'
-import { Bot, Save, MessageSquare, Smartphone, PlayCircle, QrCode, Wifi, WifiOff, Loader2 } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { saveAiSettings, checkInstanceConnection } from './actions'
+import { Bot, Save, MessageSquare, Smartphone, PlayCircle, QrCode, Wifi, WifiOff, Loader2, CheckCircle2 } from 'lucide-react'
 import { useChat } from '@ai-sdk/react'
 
 export function AiAgentClient({ tenant }: { tenant: any }) {
@@ -13,6 +13,21 @@ export function AiAgentClient({ tenant }: { tenant: any }) {
   
   const [wpStatus, setWpStatus] = useState(tenant.whatsapp_status || 'disconnected')
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null)
+
+  // Efeito de Polling: Fica checando de 3 em 3 segundos se conectou!
+  useEffect(() => {
+    let interval: NodeJS.Timeout
+    if (wpStatus === 'connecting' && qrCodeUrl) {
+      interval = setInterval(async () => {
+        const status = await checkInstanceConnection(tenant.id)
+        if (status.connected) {
+          setWpStatus('connected')
+          setQrCodeUrl(null)
+        }
+      }, 3000)
+    }
+    return () => clearInterval(interval)
+  }, [wpStatus, qrCodeUrl, tenant.id])
 
   // Vercel AI SDK - Gerencia o chat todo automaticamente!
   const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
@@ -50,7 +65,6 @@ export function AiAgentClient({ tenant }: { tenant: any }) {
       const data = await res.json()
       
       if (data.qrcode && typeof data.qrcode === 'string') {
-        // Base64 já formatado ou precisa adicionar o cabeçalho
         const qrImage = data.qrcode.startsWith('data:image') ? data.qrcode : `data:image/png;base64,${data.qrcode}`
         setQrCodeUrl(qrImage)
       } else {
@@ -62,18 +76,6 @@ export function AiAgentClient({ tenant }: { tenant: any }) {
       alert('Erro na conexão com UAZAPI.')
       setWpStatus('disconnected')
     }
-  }
-
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!chatInput.trim()) return
-    setMessages(prev => [...prev, { role: 'user', content: chatInput }])
-    
-    setTimeout(() => {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Em breve o cérebro da OpenAI estará plugado aqui para responder isso usando seu cardápio! 🧠' }])
-    }, 1000)
-    
-    setChatInput('')
   }
 
   return (
@@ -90,43 +92,72 @@ export function AiAgentClient({ tenant }: { tenant: any }) {
         <div className="space-y-6">
           
           {/* Conexão WhatsApp */}
-          <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm">
+          <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm transition-all duration-300 hover:shadow-md">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3">
                 <div className="p-2 bg-emerald-100 text-emerald-600 rounded-lg"><Smartphone className="w-5 h-5" /></div>
                 <h3 className="font-bold text-lg">Conexão WhatsApp</h3>
               </div>
-              <div className={`flex items-center space-x-1 text-sm font-medium px-3 py-1 rounded-full ${wpStatus === 'connected' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+              <div className={`flex items-center space-x-1 text-sm font-medium px-3 py-1 rounded-full transition-colors duration-500 ${wpStatus === 'connected' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
                 {wpStatus === 'connected' ? <Wifi className="w-4 h-4 mr-1" /> : <WifiOff className="w-4 h-4 mr-1" />}
                 {wpStatus === 'connected' ? 'Conectado' : 'Desconectado'}
               </div>
             </div>
 
             {wpStatus === 'disconnected' && !qrCodeUrl && (
-              <div className="text-center py-6">
-                <p className="text-neutral-500 text-sm mb-4">Seu robô ainda não está no WhatsApp. Clique abaixo para gerar o QR Code e escanear com seu celular.</p>
-                <button onClick={handleConnectWhatsApp} className="bg-emerald-500 text-white px-6 py-2 rounded-xl font-medium hover:bg-emerald-600 transition-colors inline-flex items-center">
+              <div className="text-center py-4 animate-in fade-in duration-500">
+                <p className="text-neutral-500 text-sm mb-4">Seu robô ainda não está no WhatsApp.</p>
+                
+                <div className="text-left mt-2 mb-6 text-sm text-neutral-500 space-y-2 bg-neutral-50 p-4 rounded-xl border border-neutral-100 transition-all hover:border-emerald-200">
+                  <p className="font-semibold text-neutral-800">Siga os passos para conectar:</p>
+                  <ol className="list-decimal pl-5 space-y-2">
+                    <li>Clique no botão verde <strong>"Gerar QR Code"</strong> abaixo.</li>
+                    <li>Abra o WhatsApp no celular do restaurante.</li>
+                    <li>Vá em <strong>Aparelhos Conectados</strong> e aponte a câmera.</li>
+                  </ol>
+                </div>
+
+                <button onClick={handleConnectWhatsApp} className="bg-emerald-500 text-white px-6 py-2.5 rounded-xl font-medium hover:bg-emerald-600 hover:scale-105 active:scale-95 transition-all inline-flex items-center shadow-sm">
                   <QrCode className="w-5 h-5 mr-2" /> Gerar QR Code
                 </button>
               </div>
             )}
 
             {wpStatus === 'connecting' && qrCodeUrl && (
-              <div className="text-center py-4 flex flex-col items-center">
-                <div className="p-2 bg-white border border-neutral-200 shadow-sm rounded-xl inline-block mb-4">
-                  <img src={qrCodeUrl} alt="QR Code WhatsApp" className="w-48 h-48" />
+              <div className="text-center py-8 flex flex-col items-center animate-in fade-in duration-500">
+                <div className="p-4 bg-white/60 backdrop-blur-2xl border border-neutral-200/50 shadow-[0_8px_40px_rgb(0,0,0,0.04)] rounded-3xl inline-block mb-6 transition-all duration-700 ease-out">
+                  <img src={qrCodeUrl} alt="QR Code WhatsApp" className="w-48 h-48 opacity-90 mix-blend-multiply" />
                 </div>
-                <p className="text-sm font-medium text-neutral-900 animate-pulse">Aguardando leitura do QR Code...</p>
-                <p className="text-xs text-neutral-500 mt-1">Abra o WhatsApp {'>'} Aparelhos Conectados {'>'} Conectar um aparelho</p>
-                <button onClick={() => { setQrCodeUrl(null); setWpStatus('disconnected') }} className="mt-4 text-sm text-red-500 font-medium">Cancelar</button>
+                <div className="flex items-center space-x-2 text-sm font-medium text-neutral-600 mb-2">
+                  <Loader2 className="w-4 h-4 animate-spin text-neutral-400" />
+                  <span>Aguardando conexão...</span>
+                </div>
+                <p className="text-xs text-neutral-400 mb-6">Aponte o WhatsApp do celular para a tela.</p>
+
+                <button onClick={() => { setQrCodeUrl(null); setWpStatus('disconnected') }} className="px-5 py-2 text-xs rounded-full bg-neutral-100 text-neutral-500 font-medium hover:bg-neutral-200 transition-colors">
+                  Cancelar Operação
+                </button>
               </div>
             )}
             
             {wpStatus === 'connected' && (
-              <div className="text-center py-6">
-                <p className="text-neutral-900 font-medium mb-1">WhatsApp Operacional 🚀</p>
-                <p className="text-sm text-neutral-500 mb-4">O robô já está pronto para receber mensagens.</p>
-                <button onClick={() => setWpStatus('disconnected')} className="text-red-500 text-sm font-medium hover:underline">Desconectar Aparelho</button>
+              <div className="text-center py-8 animate-in zoom-in duration-500">
+                <div className="flex justify-center mb-4">
+                  <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center">
+                    <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+                  </div>
+                </div>
+                <p className="text-neutral-900 font-bold text-lg mb-1">WhatsApp Operacional 🚀</p>
+                <p className="text-sm text-neutral-500 mb-6">O robô está online e pronto para vender 24 horas por dia.</p>
+                <button 
+                  onClick={async () => {
+                    setWpStatus('disconnected')
+                    await import('./actions').then(m => m.setWhatsAppStatus(tenant.id, 'disconnected'))
+                  }} 
+                  className="px-4 py-2 bg-neutral-100 text-neutral-500 text-xs rounded-lg font-medium hover:bg-neutral-200 transition-colors"
+                >
+                  Desconectar Aparelho
+                </button>
               </div>
             )}
           </div>
