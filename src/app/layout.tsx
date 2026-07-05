@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
-import { Outfit } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import "./globals.css";
+import { cn } from "@/lib/utils";
 
-const outfit = Outfit({
+const montserrat = Montserrat({
   subsets: ["latin"],
+  variable: '--font-montserrat',
 });
 
 export const metadata: Metadata = {
-  title: "Goomer AI - Autoatendimento",
+  title: "Atendy AI - Autoatendimento",
   description: "Cardápio digital e atendimento automático com IA.",
 };
 
@@ -19,7 +21,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${outfit.className} h-full antialiased`}
+      className={cn("h-full", "antialiased", montserrat.variable)}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

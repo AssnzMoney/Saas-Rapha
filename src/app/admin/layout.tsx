@@ -44,7 +44,7 @@ export default async function AdminLayout({
         <div className="h-16 flex items-center px-6 border-b border-neutral-100">
           <Store className="w-6 h-6 text-red-500 mr-2" />
           <span className="font-bold text-lg text-neutral-900 tracking-tight">
-            Goomer AI
+            Atendy AI
           </span>
         </div>
         
@@ -126,7 +126,7 @@ export default async function AdminLayout({
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto bg-neutral-50/50">
         <header className="h-16 bg-white border-b border-neutral-200 flex items-center justify-between px-8 md:hidden">
-            <span className="font-bold text-lg text-neutral-900">Goomer AI</span>
+            <span className="font-bold text-lg text-neutral-900">Atendy AI</span>
             {/* Mobile menu button would go here */}
         </header>
         <div className="p-8 max-w-7xl mx-auto">
