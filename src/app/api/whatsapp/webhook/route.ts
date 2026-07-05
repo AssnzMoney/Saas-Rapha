@@ -97,7 +97,7 @@ export async function POST(req: Request) {
       }
 
       // Enviar Resposta de volta pro WhatsApp
-      const UAZAPI_URL = process.env.UAZAPI_URL?.replace(/\/$/, '')
+      const UAZAPI_URL = (process.env.UAZAPI_URL || process.env.UAZAPI_BASE_URL)?.replace(/\/$/, '')
       const UAZAPI_KEY = process.env.UAZAPI_GLOBAL_API_KEY
 
       if (UAZAPI_URL && UAZAPI_KEY && finalReply) {
@@ -105,7 +105,8 @@ export async function POST(req: Request) {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'apikey': UAZAPI_KEY
+            'admintoken': UAZAPI_KEY,
+            'token': UAZAPI_KEY
           },
           body: JSON.stringify({
             number: customerPhone.replace('@s.whatsapp.net', ''),

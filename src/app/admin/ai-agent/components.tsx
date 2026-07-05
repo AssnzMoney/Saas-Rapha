@@ -49,12 +49,12 @@ export function AiAgentClient({ tenant }: { tenant: any }) {
       })
       const data = await res.json()
       
-      if (data.qrcode) {
+      if (data.qrcode && typeof data.qrcode === 'string') {
         // Base64 já formatado ou precisa adicionar o cabeçalho
         const qrImage = data.qrcode.startsWith('data:image') ? data.qrcode : `data:image/png;base64,${data.qrcode}`
         setQrCodeUrl(qrImage)
       } else {
-        alert(data.message || data.error || 'Erro ao gerar QR Code.')
+        alert(data.message || data.error || 'Erro ao gerar QR Code: ' + JSON.stringify(data))
         setWpStatus('disconnected')
       }
     } catch (error) {
