@@ -128,3 +128,18 @@
     @apply font-sans;
   }
 }
+
+.dot-pattern {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(239, 68, 68, 0.25) 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+  opacity: 0.6;
+  animation: moveDots 30s linear infinite;
+}
+
+@keyframes moveDots {
+  0% { background-position: 0 0; }
+  100% { background-position: 24px 24px; }
+}

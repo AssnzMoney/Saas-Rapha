@@ -19,20 +19,57 @@ export async function updateStoreData(formData: FormData) {
 
   const name = formData.get('name') as string
   const slug = formData.get('slug') as string
-  const mpToken = formData.get('mpToken') as string
   const themeColor = formData.get('themeColor') as string
+  const isOpen = formData.get('isOpen') === 'true'
+  const acceptsDelivery = formData.get('acceptsDelivery') === 'true'
+  const acceptsPickup = formData.get('acceptsPickup') === 'true'
+  const address = formData.get('address') as string
+  const openingHours = formData.get('openingHours') as string
+  const logoFile = formData.get('logoFile') as File | null
 
   if (!name || !slug) return { error: 'Nome e URL são obrigatórios' }
+
+  // Fazer o upload do logo se ele foi enviado
+  let finalLogoUrl = undefined;
+  if (logoFile && logoFile.size > 0) {
+    const fileExt = logoFile.name.split('.').pop()
+    const fileName = `${profile.tenant_id}-logo-${Date.now()}.${fileExt}`
+    
+    const { error: uploadError } = await supabase.storage
+      .from('menu-images')
+      .upload(`logos/${fileName}`, logoFile, {
+        upsert: true
+      })
+
+    if (!uploadError) {
+      const { data: publicUrlData } = supabase.storage
+        .from('menu-images')
+        .getPublicUrl(`logos/${fileName}`)
+        
+      finalLogoUrl = publicUrlData.publicUrl
+    }
+  }
+
+  // Objeto de atualização
+  const updatePayload: any = {
+      name,
+      slug,
+      theme_color: themeColor || '#ff4d4f',
+      is_open: isOpen,
+      accepts_delivery: acceptsDelivery,
+      accepts_pickup: acceptsPickup,
+      address: address || null,
+      opening_hours: openingHours
+  };
+
+  if (finalLogoUrl) {
+    updatePayload.logo_url = finalLogoUrl;
+  }
 
   // Atualizar a loja
   const { error: updateError } = await supabase
     .from('tenants')
-    .update({
-      name,
-      slug,
-      mp_access_token: mpToken || null,
-      theme_color: themeColor || '#ff4d4f'
-    })
+    .update(updatePayload)
     .eq('id', profile.tenant_id)
 
   if (updateError) {

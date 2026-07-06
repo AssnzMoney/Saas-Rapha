@@ -1,14 +1,30 @@
-import { Settings, CreditCard, Users, Shield } from 'lucide-react'
+import { Settings, CreditCard, Users, Shield, Lock } from 'lucide-react'
+import { BannerGuide } from '@/components/ui/banner-guide'
 
 export default function SettingsPage() {
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-5xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-neutral-900 tracking-tight">Ajustes do Sistema</h1>
-        <p className="text-neutral-500 mt-2">
-          Gerencie sua assinatura, faturamento e permissões da equipe.
-        </p>
-      </div>
+      <BannerGuide 
+        steps={[
+          {
+            title: "Segurança Avançada",
+            description: "Proteja o acesso ao seu restaurante ativando autenticação de dois fatores e monitorando os acessos.",
+            icon: <Lock className="w-8 h-8 text-blue-500" />
+          },
+          {
+            title: "Gerencie sua Equipe",
+            description: "Dê acesso a garçons, gerentes e cozinheiros com permissões exclusivas para cada um (em breve).",
+            icon: <Users className="w-8 h-8 text-emerald-500" />
+          },
+          {
+            title: "Planos e Assinaturas",
+            description: "Faça o upgrade do seu plano para liberar mensagens ilimitadas no WhatsApp e mais recursos da IA.",
+            icon: <CreditCard className="w-8 h-8 text-amber-500" />
+          }
+        ]}
+        compactTitle="Ajustes do Sistema"
+        compactDescription="Gerencie sua assinatura, faturamento e permissões da equipe."
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         

@@ -27,7 +27,7 @@ export async function buildSystemPrompt(tenantId: string) {
   // 3. Montar o texto do cardápio para a IA entender
   let menuText = '=== CARDÁPIO ===\n\n'
   
-  if (categories && items) {
+  if (categories && categories.length > 0 && items && items.length > 0) {
     categories.forEach(cat => {
       menuText += `Categoria: ${cat.name}\n`
       const catItems = items.filter(i => i.category_id === cat.id)
@@ -38,21 +38,22 @@ export async function buildSystemPrompt(tenantId: string) {
       menuText += '\n'
     })
   } else {
-    menuText += 'Cardápio vazio no momento.\n'
+    menuText += '⚠️ ATENÇÃO: O cardápio está VAZIO no momento. Informe educadamente ao cliente que o restaurante ainda está configurando o sistema e não há produtos disponíveis para venda agora.\n'
   }
+
+  const promptCustom = tenant.ai_prompt ? `\nINSTRUÇÕES DO RESTAURANTE:\n${tenant.ai_prompt}\n` : ''
 
   // 4. Montar o Prompt Final
   const finalPrompt = `
 Você é o atendente virtual do restaurante "${tenant.name}".
-
-INSTRUÇÕES DO RESTAURANTE:
-${tenant.ai_prompt}
-
+${promptCustom}
 ${menuText}
 
 REGRAS CRÍTICAS:
-- NUNCA invente itens ou preços que não estão no cardápio acima.
-- Sempre calcule o valor total corretamente.
+- Você é estritamente proibido de inventar itens, categorias, produtos ou preços que não estejam explicitamente listados no cardápio acima.
+- NUNCA sugira pratos genéricos (ex: pizza, hambúrguer, salada) se eles não estiverem no cardápio fornecido.
+- Se o cardápio estiver vazio, não tente vender nada.
+- Sempre calcule o valor total corretamente somando o preço exato fornecido na lista.
 - Quando o cliente quiser finalizar, chame a ferramenta "fazerPedido" passando a lista de produtos (ID e quantidade), o nome do cliente, endereço e forma de pagamento.
 - Se o endereço ou pagamento faltar, PERGUNTE antes de chamar a função.
 `

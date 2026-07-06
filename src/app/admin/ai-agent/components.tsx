@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { saveAiSettings, checkInstanceConnection } from './actions'
-import { Bot, Save, MessageSquare, Smartphone, PlayCircle, QrCode, Wifi, WifiOff, Loader2, CheckCircle2 } from 'lucide-react'
-import { useChat } from '@ai-sdk/react'
+import { Bot, Save, Smartphone, QrCode, Wifi, WifiOff, Loader2, CheckCircle2, Send, Paperclip, MoreVertical, Search, Check, CheckCheck, Brain, MessageSquare } from 'lucide-react'
+import { BannerGuide } from '@/components/ui/banner-guide'
 
 export function AiAgentClient({ tenant }: { tenant: any }) {
   const [loading, setLoading] = useState(false)
@@ -29,16 +29,63 @@ export function AiAgentClient({ tenant }: { tenant: any }) {
     return () => clearInterval(interval)
   }, [wpStatus, qrCodeUrl, tenant.id])
 
-  // Vercel AI SDK - Gerencia o chat todo automaticamente!
-  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
-    api: '/api/ai/chat',
-    body: {
-      tenantId: tenant.id
-    },
-    initialMessages: [
-      { id: '1', role: 'assistant', content: 'Olá! Sou o seu robô simulado. Diga um "oi" para testar minha conexão com seu cardápio.' }
-    ]
-  })
+  const [localInput, setLocalInput] = useState('')
+  const [messages, setMessages] = useState<any[]>([
+    { id: '1', role: 'assistant', content: 'Olá! Sou o seu robô simulado.\n\nDiga um "oi" para testar minha conexão com seu cardápio.' }
+  ])
+  const [isLoading, setIsLoading] = useState(false)
+
+  const sendMessage = async (content: string) => {
+    if (!content.trim() || isLoading) return;
+    
+    const userMessage = { id: Date.now().toString(), role: 'user', content };
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
+    setIsLoading(true);
+    setLocalInput('');
+
+    try {
+      const response = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: newMessages,
+          tenantId: tenant.id
+        })
+      });
+
+      if (!response.ok) throw new Error('Erro na API');
+      if (!response.body) throw new Error('Sem corpo na resposta');
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let assistantContent = '';
+      
+      const assistantMessageId = (Date.now() + 1).toString();
+      
+      // Adiciona mensagem vazia do assistente
+      setMessages(prev => [...prev, { id: assistantMessageId, role: 'assistant', content: '' }]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        assistantContent += decoder.decode(value, { stream: true });
+        
+        // Atualiza a mensagem do assistente conforme o streaming chega
+        setMessages(prev => prev.map(msg => 
+          msg.id === assistantMessageId 
+            ? { ...msg, content: assistantContent }
+            : msg
+        ));
+      }
+    } catch (err) {
+      console.error(err);
+      setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', content: 'Ocorreu um erro ao comunicar com a inteligência artificial.' }]);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
@@ -78,13 +125,32 @@ export function AiAgentClient({ tenant }: { tenant: any }) {
     }
   }
 
+  const steps = [
+    {
+      title: "Seu Atendente Inteligente",
+      description: "O Robô (IA) lê automaticamente o seu cardápio e conversa com seus clientes como se fosse um garçom humano.",
+      icon: <Brain className="w-8 h-8 text-purple-500" />
+    },
+    {
+      title: "Comportamento (Prompt)",
+      description: "Diga como o robô deve se comportar. Se ele deve ser amigável, se aceita apenas PIX, e como finalizar os pedidos.",
+      icon: <MessageSquare className="w-8 h-8 text-blue-500" />
+    },
+    {
+      title: "Conexão WhatsApp",
+      description: "Conecte o número do seu restaurante lendo o QR Code para que o robô assuma o atendimento 24 horas por dia.",
+      icon: <Smartphone className="w-8 h-8 text-emerald-500" />
+    }
+  ]
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-neutral-900">Configurações do Robô (IA)</h1>
-        <p className="text-neutral-500 mt-1">Conecte o WhatsApp e configure o comportamento do seu atendente virtual.</p>
-      </div>
+      <BannerGuide 
+        steps={steps}
+        compactTitle="Configurações do Robô (IA)"
+        compactDescription="Conecte o WhatsApp e configure o comportamento do seu atendente virtual."
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
@@ -180,69 +246,112 @@ export function AiAgentClient({ tenant }: { tenant: any }) {
               />
             </div>
 
-            <button type="submit" disabled={loading} className="w-full flex items-center justify-center space-x-2 bg-neutral-900 text-white px-4 py-3 rounded-xl font-medium hover:bg-neutral-800 transition-colors">
+            <button type="submit" disabled={loading} className="w-full flex items-center justify-center space-x-2 bg-red-600 text-white px-4 py-3 rounded-xl font-medium hover:bg-red-700 transition-colors">
               <Save className="w-5 h-5" />
               <span>{loading ? 'Salvando...' : success ? 'Salvo com Sucesso!' : 'Salvar Configurações'}</span>
             </button>
           </form>
         </div>
 
-        {/* Lado Direito: Simulador de Chat */}
+        {/* Lado Direito: Simulador de Chat WhatsApp Style */}
         <div>
-          <div className="bg-neutral-100 rounded-3xl p-4 shadow-inner border border-neutral-200 h-[600px] flex flex-col relative overflow-hidden">
-            {/* Header do Celular */}
-            <div className="bg-emerald-500 text-white rounded-2xl p-4 flex items-center space-x-3 shadow-md mb-4 z-10">
-              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-emerald-500">
-                <Bot className="w-6 h-6" />
+          <div className="bg-[#EFEAE2] rounded-3xl shadow-lg border border-neutral-200 h-[650px] flex flex-col relative overflow-hidden ring-4 ring-neutral-100">
+            {/* Header do WhatsApp */}
+            <div className="bg-[#00A884] text-white px-4 py-3 flex items-center justify-between z-10 shadow-sm">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white overflow-hidden shrink-0">
+                  <Bot className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="font-semibold leading-tight">Seu Restaurante</h4>
+                  <p className="text-[11px] text-white/80">Atendente Virtual (bot)</p>
+                </div>
               </div>
-              <div>
-                <h4 className="font-bold">Robô Teste</h4>
-                <p className="text-xs text-emerald-100">Simulador de WhatsApp</p>
+              <div className="flex items-center space-x-4 text-white/90">
+                <Search className="w-5 h-5" />
+                <MoreVertical className="w-5 h-5" />
               </div>
             </div>
 
+            {/* Fundo com pattern sutil */}
+            <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/az-subtle.png")' }}></div>
+
             {/* Chat Area */}
-            <div className="flex-1 overflow-y-auto p-2 space-y-4 mb-4 scrollbar-hide">
-              {messages.map((msg, i) => (
-                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[80%] rounded-2xl px-4 py-2 ${msg.role === 'user' ? 'bg-emerald-100 text-emerald-900' : 'bg-white text-neutral-900 shadow-sm border border-neutral-100'}`}>
-                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                    
-                    {/* Exibir quando o robô chama uma função (fazerPedido) */}
-                    {msg.toolInvocations?.map((toolCall: any) => (
-                      <div key={toolCall.toolCallId} className="mt-2 text-xs bg-emerald-50 text-emerald-700 p-2 rounded-lg border border-emerald-200">
-                        <span className="font-bold flex items-center"><Bot className="w-3 h-3 mr-1"/> Ferramenta: {toolCall.toolName}</span>
-                        {toolCall.state === 'result' ? (
-                          <span className="text-emerald-600 block mt-1">✓ {toolCall.result?.message || 'Sucesso'}</span>
-                        ) : (
-                          <span className="text-emerald-500 animate-pulse block mt-1">Executando...</span>
-                        )}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 z-10 scrollbar-hide">
+              <div className="flex justify-center mb-6">
+                <span className="bg-neutral-200/60 text-neutral-600 text-[11px] px-3 py-1 rounded-lg uppercase tracking-wider font-medium">Hoje</span>
+              </div>
+              
+              {messages.map((msg, i) => {
+                const isUser = msg.role === 'user'
+                return (
+                  <div key={i} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`relative max-w-[85%] rounded-2xl px-3 py-2 text-sm shadow-sm ${isUser ? 'bg-[#D9FDD3] text-[#111B21] rounded-tr-none' : 'bg-white text-[#111B21] rounded-tl-none'}`}>
+                      <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                      
+                      {/* Exibir quando o robô chama uma função (fazerPedido) */}
+                      {msg.toolInvocations?.map((toolCall: any) => (
+                        <div key={toolCall.toolCallId} className="mt-2 text-[11px] bg-emerald-50 text-emerald-700 p-2 rounded-lg border border-emerald-100 flex items-start gap-2">
+                          <Bot className="w-4 h-4 shrink-0 mt-0.5"/>
+                          <div>
+                            <strong className="block mb-0.5">Enviando pedido à cozinha...</strong>
+                            {toolCall.state === 'result' ? (
+                              <span className="text-emerald-600">✓ Concluído</span>
+                            ) : (
+                              <span className="text-emerald-500 animate-pulse">Processando...</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Footer da mensagem (hora e check) */}
+                      <div className="flex items-center justify-end gap-1 mt-1 opacity-60">
+                        <span className="text-[10px]">agora</span>
+                        {isUser && <CheckCheck className="w-3.5 h-3.5 text-blue-500" />}
                       </div>
-                    ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
+              
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-white text-neutral-900 shadow-sm border border-neutral-100 rounded-2xl px-4 py-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-neutral-500" />
+                  <div className="bg-white rounded-2xl rounded-tl-none px-4 py-3 shadow-sm flex items-center gap-2">
+                    <span className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Input Area */}
-            <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-2 flex items-center space-x-2 shadow-sm z-10 border border-neutral-200">
-              <input 
-                type="text" 
-                value={input}
-                onChange={handleInputChange}
-                disabled={isLoading}
-                placeholder="Mande uma mensagem..." 
-                className="flex-1 bg-transparent border-none focus:ring-0 text-sm px-2" 
-              />
-              <button type="submit" disabled={isLoading} className="p-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 disabled:opacity-50">
-                <PlayCircle className="w-5 h-5" />
+            {/* Input Area WhatsApp Style */}
+            <form onSubmit={(e) => {
+               e.preventDefault();
+               sendMessage(localInput);
+            }} className="bg-[#F0F2F5] px-4 py-3 flex items-end space-x-2 z-10">
+              <button type="button" className="p-2 text-neutral-500 hover:text-neutral-700 shrink-0 mb-1">
+                <Paperclip className="w-6 h-6" />
+              </button>
+              
+              <div className="flex-1 bg-white rounded-2xl flex items-center px-4 py-1.5 min-h-[44px] shadow-sm">
+                <input 
+                  type="text" 
+                  value={localInput}
+                  onChange={(e) => setLocalInput(e.target.value)}
+                  disabled={isLoading}
+                  placeholder="Mensagem" 
+                  className="flex-1 bg-transparent border-none focus:ring-0 text-[15px] p-0 text-neutral-800 placeholder-neutral-400 h-auto" 
+                  autoComplete="off"
+                />
+              </div>
+              
+              <button 
+                type="submit" 
+                disabled={isLoading || !localInput.trim()} 
+                className={`w-12 h-12 flex items-center justify-center rounded-full shrink-0 transition-colors ${localInput.trim() ? 'bg-[#00A884] text-white hover:bg-[#008f6f]' : 'bg-transparent text-neutral-500'}`}
+              >
+                {localInput.trim() ? <Send className="w-5 h-5 ml-1" /> : <Bot className="w-6 h-6" />}
               </button>
             </form>
           </div>

@@ -36,7 +36,9 @@ export default async function PublicMenuLayout({
             </div>
             <div>
               <h1 className="text-xl font-bold">{tenant.name}</h1>
-              <p className="text-white/80 text-sm mt-0.5">Aberto agora</p>
+              <p className="text-white/80 text-sm mt-0.5 whitespace-pre-line">
+                {tenant.opening_hours || 'Aberto agora'}
+              </p>
             </div>
           </div>
         </header>

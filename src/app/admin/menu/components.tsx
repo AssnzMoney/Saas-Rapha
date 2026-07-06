@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { createCategory, createMenuItem, deleteCategory, deleteMenuItem } from './actions'
-import { Plus, Trash2, Tag, X } from 'lucide-react'
+import { Plus, Trash2, Tag, X, FolderPlus, Image as ImageIcon, Sparkles } from 'lucide-react'
+import { BannerGuide } from '@/components/ui/banner-guide'
 
 export function CategoryModal({ onClose }: { onClose: () => void }) {
   const [loading, setLoading] = useState(false)
@@ -101,19 +102,41 @@ export function MenuManager({ categories, items }: { categories: any[], items: a
 
   return (
     <div>
+      <BannerGuide 
+        steps={[
+          {
+            title: "Organize por Categorias",
+            description: "Crie categorias como 'Lanches', 'Bebidas' e 'Sobremesas' clicando no botão Nova Categoria acima.",
+            icon: <FolderPlus className="w-8 h-8 text-amber-500" />
+          },
+          {
+            title: "Adicione os Produtos",
+            description: "Dentro de cada categoria, adicione os itens com nome, preço, uma boa descrição e fotos chamativas.",
+            icon: <ImageIcon className="w-8 h-8 text-emerald-500" />
+          },
+          {
+            title: "A IA Lê Automaticamente",
+            description: "Tudo que estiver cadastrado aqui será lido instantaneamente pelo seu Robô (IA) na hora de atender os clientes!",
+            icon: <Sparkles className="w-8 h-8 text-purple-500" />
+          }
+        ]}
+        compactTitle="Cardápio"
+        compactDescription="Gerencie os produtos que serão mostrados no WhatsApp e no Site."
+      />
+
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-neutral-900">Cardápio</h1>
-          <p className="text-neutral-500 mt-1">Gerencie os produtos que serão mostrados no WhatsApp e no Site.</p>
         </div>
         <button 
           onClick={() => setShowCategoryModal(true)}
-          className="flex items-center bg-neutral-900 hover:bg-neutral-800 text-white font-medium px-4 py-2.5 rounded-xl shadow-sm transition-colors"
+          className="flex items-center bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2.5 rounded-xl shadow-sm transition-colors"
         >
           <Plus className="w-5 h-5 mr-2" />
           Nova Categoria
         </button>
       </div>
+
+
 
       {categories.length === 0 ? (
         <div className="text-center py-20 bg-white border border-neutral-200 border-dashed rounded-2xl">

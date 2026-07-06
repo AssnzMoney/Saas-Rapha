@@ -1,5 +1,6 @@
 import { createOpenAI } from '@ai-sdk/openai'
 import { streamText, tool } from 'ai'
+import fs from 'fs'
 import { z } from 'zod'
 import { buildSystemPrompt } from '@/lib/ai/agent'
 import { submitOrder } from '@/app/[slug]/actions' // Vamos reaproveitar a action do cardápio público!
@@ -9,7 +10,9 @@ export const maxDuration = 60
 
 export async function POST(req: Request) {
   try {
-    const { messages, tenantId } = await req.json()
+    const body = await req.json()
+    const { messages, tenantId } = body
+    fs.writeFileSync('debug.log', JSON.stringify({ event: 'ROUTE_HIT', body }, null, 2) + '\n', { flag: 'a' })
     
     // Configurar OpenAI com a chave global (que você colocou no .env.local)
     const openai = createOpenAI({
@@ -66,8 +69,10 @@ export async function POST(req: Request) {
       }
     })
 
-    return result.toDataStreamResponse()
+    return result.toTextStreamResponse()
   } catch (error: any) {
+    fs.writeFileSync('error.log', JSON.stringify({ message: error.message, stack: error.stack }, null, 2))
+    console.error('CHAT ERROR:', error)
     return new Response(JSON.stringify({ error: error.message }), { status: 500 })
   }
 }

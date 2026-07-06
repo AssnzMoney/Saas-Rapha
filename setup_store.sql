@@ -8,3 +8,6 @@ ADD COLUMN IF NOT EXISTS ai_prompt text;
 
 -- Adicionar coluna para guardar o token da instância para consultar status de conexão sem webhook
 ALTER TABLE tenants ADD COLUMN IF NOT EXISTS uazapi_instance_token text;
+
+-- Adicionar horário de funcionamento
+ALTER TABLE tenants ADD COLUMN IF NOT EXISTS opening_hours text;

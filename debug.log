@@ -1,0 +1,212 @@
+{
+  "event": "ROUTE_HIT",
+  "body": {
+    "messages": [
+      {
+        "id": "1",
+        "role": "assistant",
+        "content": "Olá! Sou o seu robô simulado.\n\nDiga um \"oi\" para testar minha conexão com seu cardápio."
+      },
+      {
+        "id": "1783305891880",
+        "role": "user",
+        "content": "ola"
+      }
+    ],
+    "tenantId": "2a87dcd2-f6ae-4c70-a67b-e39bd48aef7f"
+  }
+}
+{
+  "event": "ROUTE_HIT",
+  "body": {
+    "messages": [
+      {
+        "id": "1",
+        "role": "assistant",
+        "content": "Olá! Sou o seu robô simulado.\n\nDiga um \"oi\" para testar minha conexão com seu cardápio."
+      },
+      {
+        "id": "1783305891880",
+        "role": "user",
+        "content": "ola"
+      },
+      {
+        "id": "1783305901714",
+        "role": "assistant",
+        "content": "Olá! 😊 Como posso ajudar você hoje? Quer dar uma olhada no cardápio? 🍽️"
+      },
+      {
+        "id": "1783305919001",
+        "role": "user",
+        "content": "sim, voces teriam oq"
+      }
+    ],
+    "tenantId": "2a87dcd2-f6ae-4c70-a67b-e39bd48aef7f"
+  }
+}
+{
+  "event": "ROUTE_HIT",
+  "body": {
+    "messages": [
+      {
+        "id": "1",
+        "role": "assistant",
+        "content": "Olá! Sou o seu robô simulado.\n\nDiga um \"oi\" para testar minha conexão com seu cardápio."
+      },
+      {
+        "id": "1783307613158",
+        "role": "user",
+        "content": "ola"
+      }
+    ],
+    "tenantId": "2a87dcd2-f6ae-4c70-a67b-e39bd48aef7f"
+  }
+}
+{
+  "event": "ROUTE_HIT",
+  "body": {
+    "messages": [
+      {
+        "id": "1",
+        "role": "assistant",
+        "content": "Olá! Sou o seu robô simulado.\n\nDiga um \"oi\" para testar minha conexão com seu cardápio."
+      },
+      {
+        "id": "1783307613158",
+        "role": "user",
+        "content": "ola"
+      },
+      {
+        "id": "1783307617850",
+        "role": "assistant",
+        "content": "Olá! 😊 Bem-vindo ao Bistro Avenida! O que você gostaria de pedir hoje? Tenho um cardápio delicioso à sua disposição! 🍽️"
+      },
+      {
+        "id": "1783307628019",
+        "role": "user",
+        "content": "qual o cardapio"
+      }
+    ],
+    "tenantId": "2a87dcd2-f6ae-4c70-a67b-e39bd48aef7f"
+  }
+}
+{
+  "event": "ROUTE_HIT",
+  "body": {
+    "messages": [
+      {
+        "id": "1",
+        "role": "assistant",
+        "content": "Olá! Sou o seu robô simulado.\n\nDiga um \"oi\" para testar minha conexão com seu cardápio."
+      },
+      {
+        "id": "1783307818474",
+        "role": "user",
+        "content": "ola"
+      }
+    ],
+    "tenantId": "2a87dcd2-f6ae-4c70-a67b-e39bd48aef7f"
+  }
+}
+{
+  "event": "ROUTE_HIT",
+  "body": {
+    "messages": [
+      {
+        "id": "1",
+        "role": "assistant",
+        "content": "Olá! Sou o seu robô simulado.\n\nDiga um \"oi\" para testar minha conexão com seu cardápio."
+      },
+      {
+        "id": "1783307867973",
+        "role": "user",
+        "content": "ola"
+      }
+    ],
+    "tenantId": "2a87dcd2-f6ae-4c70-a67b-e39bd48aef7f"
+  }
+}
+{
+  "event": "ROUTE_HIT",
+  "body": {
+    "messages": [
+      {
+        "id": "1",
+        "role": "assistant",
+        "content": "Olá! Sou o seu robô simulado.\n\nDiga um \"oi\" para testar minha conexão com seu cardápio."
+      },
+      {
+        "id": "1783307867973",
+        "role": "user",
+        "content": "ola"
+      },
+      {
+        "id": "1783307870292",
+        "role": "assistant",
+        "content": "Olá! 😊 Como posso ajudar você hoje? Está interessado em algo do nosso cardápio? 🍕"
+      },
+      {
+        "id": "1783307884735",
+        "role": "user",
+        "content": "teriam oq"
+      }
+    ],
+    "tenantId": "2a87dcd2-f6ae-4c70-a67b-e39bd48aef7f"
+  }
+}
+{
+  "event": "ROUTE_HIT",
+  "body": {
+    "messages": [
+      {
+        "id": "1",
+        "role": "assistant",
+        "content": "Olá! Sou o seu robô simulado.\n\nDiga um \"oi\" para testar minha conexão com seu cardápio."
+      },
+      {
+        "id": "1783307867973",
+        "role": "user",
+        "content": "ola"
+      },
+      {
+        "id": "1783307870292",
+        "role": "assistant",
+        "content": "Olá! 😊 Como posso ajudar você hoje? Está interessado em algo do nosso cardápio? 🍕"
+      },
+      {
+        "id": "1783307884735",
+        "role": "user",
+        "content": "teriam oq"
+      },
+      {
+        "id": "1783307887666",
+        "role": "assistant",
+        "content": "Temos deliciosas pizzas disponíveis! 🍕 Cada pizza custa R$ 66,00. \n\nSe quiser, posso ajudar você a escolher ou tirar dúvidas!"
+      },
+      {
+        "id": "1783307911276",
+        "role": "user",
+        "content": "me manda o cardapio"
+      }
+    ],
+    "tenantId": "2a87dcd2-f6ae-4c70-a67b-e39bd48aef7f"
+  }
+}
+{
+  "event": "ROUTE_HIT",
+  "body": {
+    "messages": [
+      {
+        "id": "1",
+        "role": "assistant",
+        "content": "Olá! Sou o seu robô simulado.\n\nDiga um \"oi\" para testar minha conexão com seu cardápio."
+      },
+      {
+        "id": "1783308065022",
+        "role": "user",
+        "content": "olaa"
+      }
+    ],
+    "tenantId": "2a87dcd2-f6ae-4c70-a67b-e39bd48aef7f"
+  }
+}
