@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { MercadoPagoConfig, Payment } from 'mercadopago'
 import { createClient } from '@/lib/supabase/server'
 
 export async function POST(req: Request) {
@@ -20,30 +19,44 @@ export async function POST(req: Request) {
       .single()
 
     // Se o lojista não tiver configurado sua própria chave, tentamos usar uma global provisória do arquivo .env
-    const accessToken = tenant?.mp_access_token || process.env.MERCADOPAGO_GLOBAL_ACCESS_TOKEN
+    let accessToken = (tenant?.mp_access_token || process.env.MERCADOPAGO_GLOBAL_ACCESS_TOKEN || '').trim()
 
-    if (!accessToken) {
-      return NextResponse.json({ error: 'Loja não possui Mercado Pago configurado.' }, { status: 500 })
+    if (!accessToken || accessToken === 'APP_USR-sua-chave-aqui') {
+      return NextResponse.json({ error: 'Sua chave do Mercado Pago é inválida ou não foi configurada. Acesse a aba Integrações e insira uma chave de produção válida (APP_USR-...).' }, { status: 500 })
     }
 
-    // 2. Configurar o SDK do MP
-    const client = new MercadoPagoConfig({ accessToken: accessToken, options: { timeout: 5000 } })
-    const payment = new Payment(client)
+    // Verificar se o usuário colocou a "Public Key" por engano (Public Keys costumam ter 41 caracteres com o prefixo)
+    // Access Tokens de verdade têm mais de 70 caracteres.
+    if (accessToken.length < 60) {
+      return NextResponse.json({ error: 'Você inseriu uma Chave Pública em vez do Access Token! O Access Token correto é bem maior (mais de 70 caracteres). Volte ao painel do Mercado Pago e copie o Access Token.' }, { status: 500 })
+    }
 
-    // 3. Criar a cobrança PIX
-    const result = await payment.create({
-      body: {
+    // 2. Criar a cobrança PIX direto na API
+    const mpRes = await fetch('https://api.mercadopago.com/v1/payments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+        'X-Idempotency-Key': crypto.randomUUID()
+      },
+      body: JSON.stringify({
         transaction_amount: Number(total),
+        application_fee: 0.50,
         description: `Pedido #${orderId} - Saas`,
         payment_method_id: 'pix',
         payer: {
-          email: 'cliente@exemplo.com', // Obrigatório para a API, mas podemos usar dummy se não capturamos
+          email: 'cliente@exemplo.com',
           first_name: customerName || 'Cliente'
-        },
-        // Opcional: Para receber notificação de quando foi pago
-        // notification_url: 'https://sua-url-railway.app/api/checkout/webhook' 
-      }
+        }
+      })
     })
+
+    const result = await mpRes.json()
+
+    if (!mpRes.ok) {
+      console.error("Erro MP API:", result)
+      throw new Error(result.message || 'Erro ao processar pagamento no Mercado Pago')
+    }
 
     const qrCode = result.point_of_interaction?.transaction_data?.qr_code
     const qrCodeBase64 = result.point_of_interaction?.transaction_data?.qr_code_base64

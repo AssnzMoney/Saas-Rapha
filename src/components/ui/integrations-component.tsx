@@ -85,38 +85,28 @@ export default function IntegrationsSection({ initialData }: IntegrationsSection
               </span>
             )}
           </div>
-          
-          <form action={handleSubmit} className="p-6 flex flex-col flex-1 bg-neutral-50/50">
+          <div className="p-6 flex flex-col flex-1 bg-neutral-50/50">
             <div className="flex-1 mb-6">
-              <label className="block text-sm font-medium text-neutral-700 mb-2">
-                Access Token (Produção)
-              </label>
-              <input
-                type="password"
-                name="mpToken"
-                defaultValue={initialData?.mp_access_token || ''}
-                className="block w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white shadow-sm transition-all mb-4"
-                placeholder="APP_USR-..."
-              />
-              <div className="mt-2 text-xs text-neutral-500 space-y-1 bg-white/50 p-3 rounded-lg border border-neutral-200 shadow-sm">
-                <p className="font-semibold text-neutral-700 mb-2">Como obter o seu Token:</p>
-                <ol className="list-decimal pl-4 space-y-2">
-                  <li>Acesse o <a href="https://mercadopago.com.br/developers/panel" target="_blank" rel="noreferrer" className="text-blue-600 hover:underline font-medium">Painel de Desenvolvedores</a> do Mercado Pago.</li>
-                  <li>Crie uma nova aplicação (ou abra uma existente).</li>
-                  <li>No menu lateral, vá em <strong>Credenciais de Produção</strong>.</li>
-                  <li>Copie o valor do <strong>Access Token</strong> (Começa com <code>APP_USR-</code>) e cole acima.</li>
-                </ol>
+              <div className="mt-2 text-sm text-neutral-600 space-y-4 bg-white/50 p-4 rounded-xl border border-neutral-200 shadow-sm">
+                <p>
+                  Conecte sua conta do Mercado Pago para receber pagamentos via PIX automaticamente.
+                  A divisão de pagamentos (taxa da plataforma) será feita na hora!
+                </p>
+                {initialData?.mp_access_token && (
+                  <div className="p-3 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-sm font-medium">
+                    Sua conta já está conectada. Se desejar, você pode reconectar clicando no botão abaixo.
+                  </div>
+                )}
               </div>
             </div>
             
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full flex items-center justify-center px-4 py-3 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 disabled:opacity-50 transition-colors shadow-sm"
+            <a
+              href={`https://auth.mercadopago.com/authorization?client_id=${process.env.NEXT_PUBLIC_MP_CLIENT_ID}&response_type=code&platform_id=mp&state=${initialData.id}&redirect_uri=${process.env.NEXT_PUBLIC_MP_REDIRECT_URI}`}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#009EE3] text-white font-bold rounded-xl hover:bg-[#008DD0] transition-colors shadow-sm"
             >
-              {isSubmitting ? 'Salvando...' : 'Salvar Configuração'}
-            </button>
-          </form>
+              Conectar com Mercado Pago
+            </a>
+          </div>
         </div>
 
         {/* WhatsApp - Em Breve (Borrado) */}

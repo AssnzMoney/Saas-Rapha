@@ -210,3 +210,211 @@
     "tenantId": "2a87dcd2-f6ae-4c70-a67b-e39bd48aef7f"
   }
 }
+{
+  "event": "ROUTE_HIT",
+  "body": {
+    "messages": [
+      {
+        "id": "1",
+        "role": "assistant",
+        "content": "Olá! Sou o seu robô simulado.\n\nDiga um \"oi\" para testar minha conexão com seu cardápio."
+      },
+      {
+        "id": "1783315277336",
+        "role": "user",
+        "content": "qual nosso endereco?"
+      }
+    ],
+    "tenantId": "2a87dcd2-f6ae-4c70-a67b-e39bd48aef7f"
+  }
+}
+{
+  "event": "ROUTE_HIT",
+  "body": {
+    "messages": [
+      {
+        "id": "1",
+        "role": "assistant",
+        "content": "Olá! Sou o seu robô simulado.\n\nDiga um \"oi\" para testar minha conexão com seu cardápio."
+      },
+      {
+        "id": "1783315358731",
+        "role": "user",
+        "content": "quero o cardapio"
+      }
+    ],
+    "tenantId": "2a87dcd2-f6ae-4c70-a67b-e39bd48aef7f"
+  }
+}
+{
+  "event": "ROUTE_HIT",
+  "body": {
+    "messages": [
+      {
+        "id": "1",
+        "role": "assistant",
+        "content": "Olá! Sou o seu robô simulado.\n\nDiga um \"oi\" para testar minha conexão com seu cardápio."
+      },
+      {
+        "id": "1783315358731",
+        "role": "user",
+        "content": "quero o cardapio"
+      },
+      {
+        "id": "1783315361476",
+        "role": "assistant",
+        "content": "Claro! Aqui está o nosso cardápio:\n\n**Categoria: Pizzas**\n- **Nome:** Pizza de Queijo\n  - **Preço:** R$ 22,00\n  - **Descrição:** Queijo 🧀\n\nSe você gostaria de fazer um pedido ou tiver alguma dúvida, estou aqui para ajudar! 😊"
+      },
+      {
+        "id": "1783315380335",
+        "role": "user",
+        "content": "vou querer uma de queijo"
+      }
+    ],
+    "tenantId": "2a87dcd2-f6ae-4c70-a67b-e39bd48aef7f"
+  }
+}
+{
+  "event": "ROUTE_HIT",
+  "body": {
+    "messages": [
+      {
+        "id": "1",
+        "role": "assistant",
+        "content": "Olá! Sou o seu robô simulado.\n\nDiga um \"oi\" para testar minha conexão com seu cardápio."
+      },
+      {
+        "id": "1783315358731",
+        "role": "user",
+        "content": "quero o cardapio"
+      },
+      {
+        "id": "1783315361476",
+        "role": "assistant",
+        "content": "Claro! Aqui está o nosso cardápio:\n\n**Categoria: Pizzas**\n- **Nome:** Pizza de Queijo\n  - **Preço:** R$ 22,00\n  - **Descrição:** Queijo 🧀\n\nSe você gostaria de fazer um pedido ou tiver alguma dúvida, estou aqui para ajudar! 😊"
+      },
+      {
+        "id": "1783315380335",
+        "role": "user",
+        "content": "vou querer uma de queijo"
+      },
+      {
+        "id": "1783315383079",
+        "role": "assistant",
+        "content": "Ótima escolha! 🍕\n\nAntes de finalizar, você pode me informar a forma de pagamento (Pix, Cartão ou Dinheiro) e, se for entrega, o seu endereço? 😊"
+      },
+      {
+        "id": "1783315387787",
+        "role": "user",
+        "content": "pix"
+      }
+    ],
+    "tenantId": "2a87dcd2-f6ae-4c70-a67b-e39bd48aef7f"
+  }
+}
+{
+  "event": "ROUTE_HIT",
+  "body": {
+    "messages": [
+      {
+        "id": "1",
+        "role": "assistant",
+        "content": "Olá! Sou o seu robô simulado.\n\nDiga um \"oi\" para testar minha conexão com seu cardápio."
+      },
+      {
+        "id": "1783315358731",
+        "role": "user",
+        "content": "quero o cardapio"
+      },
+      {
+        "id": "1783315361476",
+        "role": "assistant",
+        "content": "Claro! Aqui está o nosso cardápio:\n\n**Categoria: Pizzas**\n- **Nome:** Pizza de Queijo\n  - **Preço:** R$ 22,00\n  - **Descrição:** Queijo 🧀\n\nSe você gostaria de fazer um pedido ou tiver alguma dúvida, estou aqui para ajudar! 😊"
+      },
+      {
+        "id": "1783315380335",
+        "role": "user",
+        "content": "vou querer uma de queijo"
+      },
+      {
+        "id": "1783315383079",
+        "role": "assistant",
+        "content": "Ótima escolha! 🍕\n\nAntes de finalizar, você pode me informar a forma de pagamento (Pix, Cartão ou Dinheiro) e, se for entrega, o seu endereço? 😊"
+      },
+      {
+        "id": "1783315387787",
+        "role": "user",
+        "content": "pix"
+      },
+      {
+        "id": "1783315391241",
+        "role": "assistant",
+        "content": "Perfeito! Agora, por favor, informe o seu endereço de entrega. 🏠✨"
+      },
+      {
+        "id": "1783315398515",
+        "role": "user",
+        "content": "santa rosa"
+      }
+    ],
+    "tenantId": "2a87dcd2-f6ae-4c70-a67b-e39bd48aef7f"
+  }
+}
+{
+  "event": "ROUTE_HIT",
+  "body": {
+    "messages": [
+      {
+        "id": "1",
+        "role": "assistant",
+        "content": "Olá! Sou o seu robô simulado.\n\nDiga um \"oi\" para testar minha conexão com seu cardápio."
+      },
+      {
+        "id": "1783315358731",
+        "role": "user",
+        "content": "quero o cardapio"
+      },
+      {
+        "id": "1783315361476",
+        "role": "assistant",
+        "content": "Claro! Aqui está o nosso cardápio:\n\n**Categoria: Pizzas**\n- **Nome:** Pizza de Queijo\n  - **Preço:** R$ 22,00\n  - **Descrição:** Queijo 🧀\n\nSe você gostaria de fazer um pedido ou tiver alguma dúvida, estou aqui para ajudar! 😊"
+      },
+      {
+        "id": "1783315380335",
+        "role": "user",
+        "content": "vou querer uma de queijo"
+      },
+      {
+        "id": "1783315383079",
+        "role": "assistant",
+        "content": "Ótima escolha! 🍕\n\nAntes de finalizar, você pode me informar a forma de pagamento (Pix, Cartão ou Dinheiro) e, se for entrega, o seu endereço? 😊"
+      },
+      {
+        "id": "1783315387787",
+        "role": "user",
+        "content": "pix"
+      },
+      {
+        "id": "1783315391241",
+        "role": "assistant",
+        "content": "Perfeito! Agora, por favor, informe o seu endereço de entrega. 🏠✨"
+      },
+      {
+        "id": "1783315398515",
+        "role": "user",
+        "content": "santa rosa"
+      },
+      {
+        "id": "1783315401197",
+        "role": "assistant",
+        "content": "Ótimo! Só para confirmar, você pediu uma pizza de queijo por R$ 22,00, a forma de pagamento é Pix e o endereço é Santa Rosa. \n\nEstá tudo certo? Podemos finalizar o pedido! 😊"
+      },
+      {
+        "id": "1783315404963",
+        "role": "user",
+        "content": "sim"
+      }
+    ],
+    "tenantId": "2a87dcd2-f6ae-4c70-a67b-e39bd48aef7f"
+  }
+}

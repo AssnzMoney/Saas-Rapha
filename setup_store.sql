@@ -11,3 +11,7 @@ ALTER TABLE tenants ADD COLUMN IF NOT EXISTS uazapi_instance_token text;
 
 -- Adicionar horário de funcionamento
 ALTER TABLE tenants ADD COLUMN IF NOT EXISTS opening_hours text;
+
+-- Adicionar colunas do Mercado Pago
+ALTER TABLE tenants ADD COLUMN IF NOT EXISTS mp_access_token text;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS mp_payment_id text;

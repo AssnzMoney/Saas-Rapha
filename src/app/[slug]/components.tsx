@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useCartStore } from '@/store/cart'
-import { ShoppingBag, ChevronLeft, Plus, Minus, X, CheckCircle2 } from 'lucide-react'
+import { ShoppingBag, ChevronLeft, Plus, Minus, X, CheckCircle2, Store, Search, User, Phone, MapPin, Hash, CreditCard, Banknote, QrCode, Truck, PackageOpen, Map, Copy } from 'lucide-react'
 import { submitOrder } from './actions'
 
 // --- 1. Product Modal ---
@@ -107,8 +107,13 @@ function CheckoutModal({ tenantId, onClose }: { tenantId: string, onClose: () =>
   
   // Checkout Form State
   const [name, setName] = useState('')
-  const [address, setAddress] = useState('')
+  const [phone, setPhone] = useState('')
+  const [street, setStreet] = useState('')
+  const [number, setNumber] = useState('')
+  const [neighborhood, setNeighborhood] = useState('')
+  const [orderType, setOrderType] = useState<'DELIVERY'|'PICKUP'>('DELIVERY')
   const [paymentMethod, setPaymentMethod] = useState('PIX') // PIX, CARD, CASH
+  const [copied, setCopied] = useState(false)
 
   const [pixData, setPixData] = useState<{qrCode: string, qrCodeBase64: string} | null>(null)
 
@@ -118,11 +123,15 @@ function CheckoutModal({ tenantId, onClose }: { tenantId: string, onClose: () =>
     e.preventDefault()
     setLoading(true)
     
+    const fullAddress = orderType === 'DELIVERY' 
+      ? `${street}, ${number} - ${neighborhood} - Contato: ${phone}`
+      : `Retirada no Local - Contato: ${phone}`
+
     // Call server action to save order
     const result = await submitOrder({
       tenantId,
       customerName: name,
-      address,
+      address: fullAddress,
       paymentMethod,
       items,
       total
@@ -166,25 +175,39 @@ function CheckoutModal({ tenantId, onClose }: { tenantId: string, onClose: () =>
   if (pixData) {
     return (
       <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-4">
-        <div className="bg-white w-full max-w-md rounded-2xl p-6 relative flex flex-col items-center text-center">
-          <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-4">
+        <div className="bg-white w-full max-w-md rounded-3xl p-6 relative flex flex-col items-center text-center shadow-2xl animate-in slide-in-from-bottom sm:slide-in-from-bottom-8 duration-300">
+          <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-4 shadow-inner">
             <CheckCircle2 className="w-8 h-8" />
           </div>
-          <h2 className="text-2xl font-bold mb-2">Pedido Criado!</h2>
-          <p className="text-neutral-500 mb-6">Escaneie o QR Code abaixo no app do seu banco para pagar.</p>
+          <h2 className="text-2xl font-bold mb-1 text-neutral-900">Pedido Criado!</h2>
+          <p className="text-neutral-500 mb-6 text-sm">Escaneie o QR Code ou copie o código abaixo para pagar.</p>
           
-          <img src={`data:image/jpeg;base64,${pixData.qrCodeBase64}`} alt="QR Code PIX" className="w-48 h-48 mb-4 border border-neutral-200 rounded-xl p-2" />
+          <div className="bg-neutral-50 p-4 rounded-2xl border-2 border-neutral-100 mb-6 shadow-sm w-full max-w-[280px]">
+             <img src={`data:image/jpeg;base64,${pixData.qrCodeBase64}`} alt="QR Code PIX" className="w-full h-auto rounded-xl" />
+          </div>
           
-          <div className="w-full bg-neutral-50 p-4 rounded-xl border border-neutral-200 flex flex-col space-y-2 mb-6 text-left overflow-hidden">
-            <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Pix Copia e Cola</span>
-            <span className="text-sm text-neutral-800 break-all">{pixData.qrCode}</span>
+          <div className="w-full bg-neutral-100 p-1 rounded-2xl border border-neutral-200 flex flex-col mb-6">
+            <button 
+              onClick={() => {
+                navigator.clipboard.writeText(pixData.qrCode)
+                setCopied(true)
+                setTimeout(() => setCopied(false), 2000)
+              }}
+              className={`flex items-center justify-center gap-2 py-4 px-4 rounded-xl font-bold text-base transition-all ${copied ? 'bg-emerald-500 text-white shadow-md scale-[0.98]' : 'bg-white text-neutral-700 hover:bg-neutral-50 shadow-sm'}`}
+            >
+              {copied ? (
+                <>Copiado! <CheckCircle2 className="w-5 h-5" /></>
+              ) : (
+                <>Copiar Código PIX <Copy className="w-5 h-5" /></>
+              )}
+            </button>
           </div>
 
           <button 
-            onClick={() => { setPixData(null); onClose(); clearCart(); }}
-            className="w-full bg-emerald-500 text-white rounded-xl py-4 font-bold text-lg hover:bg-emerald-600 transition-colors"
+            onClick={() => { setPixData(null); setSuccess(true); clearCart(); }}
+            className="w-full bg-neutral-100 text-neutral-900 rounded-xl py-4 font-bold hover:bg-neutral-200 transition-colors"
           >
-            Já Paguei!
+            Já Paguei (Fechar)
           </button>
         </div>
       </div>
@@ -236,31 +259,107 @@ function CheckoutModal({ tenantId, onClose }: { tenantId: string, onClose: () =>
             </ul>
           </div>
 
-          <form id="checkout-form" onSubmit={handleCheckout} className="space-y-4">
-            <div className="bg-white rounded-xl p-4 shadow-sm border border-neutral-100">
-              <h3 className="font-bold text-neutral-900 mb-4">Dados de Entrega</h3>
-              <div className="space-y-3">
-                <input required type="text" placeholder="Seu Nome" value={name} onChange={e => setName(e.target.value)}
-                  className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm focus:border-[var(--brand-color)] focus:ring-[var(--brand-color)]" />
-                <textarea required placeholder="Endereço Completo (Rua, Número, Bairro, Complemento)" rows={2} value={address} onChange={e => setAddress(e.target.value)}
-                  className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm focus:border-[var(--brand-color)] focus:ring-[var(--brand-color)]" />
+          <form id="checkout-form" onSubmit={handleCheckout} className="space-y-6">
+            
+            {/* Tipo de Pedido */}
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-neutral-100">
+              <h3 className="font-bold text-neutral-900 mb-4 flex items-center gap-2">
+                <Store className="w-5 h-5 text-[var(--brand-color)]" />
+                Como deseja receber?
+              </h3>
+              <div className="flex bg-neutral-100 p-1 rounded-xl">
+                <button
+                  type="button"
+                  onClick={() => setOrderType('DELIVERY')}
+                  className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-all ${orderType === 'DELIVERY' ? 'bg-white shadow-sm text-[var(--brand-color)]' : 'text-neutral-500 hover:text-neutral-700'}`}
+                >
+                  <Truck className="w-4 h-4" /> Entrega
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOrderType('PICKUP')}
+                  className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-all ${orderType === 'PICKUP' ? 'bg-white shadow-sm text-[var(--brand-color)]' : 'text-neutral-500 hover:text-neutral-700'}`}
+                >
+                  <PackageOpen className="w-4 h-4" /> Retirada no Local
+                </button>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl p-4 shadow-sm border border-neutral-100">
-              <h3 className="font-bold text-neutral-900 mb-4">Pagamento na Entrega</h3>
-              <div className="space-y-2">
-                <label className="flex items-center space-x-3 p-3 border border-neutral-100 rounded-xl cursor-pointer hover:bg-neutral-50">
-                  <input type="radio" name="payment" value="PIX" checked={paymentMethod === 'PIX'} onChange={e => setPaymentMethod(e.target.value)} className="text-[var(--brand-color)] focus:ring-[var(--brand-color)]" />
-                  <span className="text-sm font-medium text-neutral-900">Pix (Código QR na entrega)</span>
+            {/* Dados do Cliente */}
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-neutral-100">
+              <h3 className="font-bold text-neutral-900 mb-4 flex items-center gap-2">
+                <User className="w-5 h-5 text-[var(--brand-color)]" />
+                Seus Dados
+              </h3>
+              <div className="space-y-3">
+                <div className="relative">
+                  <User className="absolute left-3 top-3.5 w-5 h-5 text-neutral-400" />
+                  <input required type="text" placeholder="Seu Nome" value={name} onChange={e => setName(e.target.value)}
+                    className="w-full rounded-xl border border-neutral-200 pl-10 pr-4 py-3 text-sm focus:border-[var(--brand-color)] focus:ring-[var(--brand-color)] transition-all bg-neutral-50 focus:bg-white" />
+                </div>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-3.5 w-5 h-5 text-neutral-400" />
+                  <input required type="tel" placeholder="Telefone / WhatsApp" value={phone} onChange={e => setPhone(e.target.value)}
+                    className="w-full rounded-xl border border-neutral-200 pl-10 pr-4 py-3 text-sm focus:border-[var(--brand-color)] focus:ring-[var(--brand-color)] transition-all bg-neutral-50 focus:bg-white" />
+                </div>
+              </div>
+            </div>
+
+            {/* Endereço de Entrega */}
+            {orderType === 'DELIVERY' && (
+              <div className="bg-white rounded-2xl p-5 shadow-sm border border-neutral-100 animate-in fade-in slide-in-from-top-4 duration-300">
+                <h3 className="font-bold text-neutral-900 mb-4 flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-[var(--brand-color)]" />
+                  Endereço de Entrega
+                </h3>
+                <div className="space-y-3">
+                  <div className="relative">
+                    <Map className="absolute left-3 top-3.5 w-5 h-5 text-neutral-400" />
+                    <input required={orderType === 'DELIVERY'} type="text" placeholder="Rua/Avenida" value={street} onChange={e => setStreet(e.target.value)}
+                      className="w-full rounded-xl border border-neutral-200 pl-10 pr-4 py-3 text-sm focus:border-[var(--brand-color)] focus:ring-[var(--brand-color)] transition-all bg-neutral-50 focus:bg-white" />
+                  </div>
+                  <div className="flex gap-3">
+                    <div className="relative w-1/3">
+                      <Hash className="absolute left-3 top-3.5 w-5 h-5 text-neutral-400" />
+                      <input required={orderType === 'DELIVERY'} type="text" placeholder="Nº" value={number} onChange={e => setNumber(e.target.value)}
+                        className="w-full rounded-xl border border-neutral-200 pl-10 pr-4 py-3 text-sm focus:border-[var(--brand-color)] focus:ring-[var(--brand-color)] transition-all bg-neutral-50 focus:bg-white" />
+                    </div>
+                    <div className="relative w-2/3">
+                      <MapPin className="absolute left-3 top-3.5 w-5 h-5 text-neutral-400" />
+                      <input required={orderType === 'DELIVERY'} type="text" placeholder="Bairro" value={neighborhood} onChange={e => setNeighborhood(e.target.value)}
+                        className="w-full rounded-xl border border-neutral-200 pl-10 pr-4 py-3 text-sm focus:border-[var(--brand-color)] focus:ring-[var(--brand-color)] transition-all bg-neutral-50 focus:bg-white" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Pagamento */}
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-neutral-100">
+              <h3 className="font-bold text-neutral-900 mb-4 flex items-center gap-2">
+                <CreditCard className="w-5 h-5 text-[var(--brand-color)]" />
+                Forma de Pagamento
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <label className={`relative flex flex-col items-center p-4 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === 'PIX' ? 'border-[var(--brand-color)] bg-[var(--brand-color)]/5' : 'border-neutral-100 hover:border-neutral-200'}`}>
+                  <input type="radio" name="payment" value="PIX" className="sr-only" checked={paymentMethod === 'PIX'} onChange={e => setPaymentMethod(e.target.value)} />
+                  <QrCode className={`w-8 h-8 mb-2 transition-colors ${paymentMethod === 'PIX' ? 'text-[var(--brand-color)]' : 'text-neutral-400'}`} />
+                  <span className={`text-sm font-medium transition-colors ${paymentMethod === 'PIX' ? 'text-[var(--brand-color)]' : 'text-neutral-600'}`}>Pix</span>
+                  {paymentMethod === 'PIX' && <CheckCircle2 className="absolute top-2 right-2 w-4 h-4 text-[var(--brand-color)]" />}
                 </label>
-                <label className="flex items-center space-x-3 p-3 border border-neutral-100 rounded-xl cursor-pointer hover:bg-neutral-50">
-                  <input type="radio" name="payment" value="CARD" checked={paymentMethod === 'CARD'} onChange={e => setPaymentMethod(e.target.value)} className="text-[var(--brand-color)] focus:ring-[var(--brand-color)]" />
-                  <span className="text-sm font-medium text-neutral-900">Cartão de Crédito/Débito</span>
+                
+                <label className={`relative flex flex-col items-center p-4 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === 'CARD' ? 'border-[var(--brand-color)] bg-[var(--brand-color)]/5' : 'border-neutral-100 hover:border-neutral-200'}`}>
+                  <input type="radio" name="payment" value="CARD" className="sr-only" checked={paymentMethod === 'CARD'} onChange={e => setPaymentMethod(e.target.value)} />
+                  <CreditCard className={`w-8 h-8 mb-2 transition-colors ${paymentMethod === 'CARD' ? 'text-[var(--brand-color)]' : 'text-neutral-400'}`} />
+                  <span className={`text-sm font-medium transition-colors ${paymentMethod === 'CARD' ? 'text-[var(--brand-color)]' : 'text-neutral-600'}`}>Cartão</span>
+                  {paymentMethod === 'CARD' && <CheckCircle2 className="absolute top-2 right-2 w-4 h-4 text-[var(--brand-color)]" />}
                 </label>
-                <label className="flex items-center space-x-3 p-3 border border-neutral-100 rounded-xl cursor-pointer hover:bg-neutral-50">
-                  <input type="radio" name="payment" value="CASH" checked={paymentMethod === 'CASH'} onChange={e => setPaymentMethod(e.target.value)} className="text-[var(--brand-color)] focus:ring-[var(--brand-color)]" />
-                  <span className="text-sm font-medium text-neutral-900">Dinheiro</span>
+
+                <label className={`relative flex flex-col items-center p-4 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === 'CASH' ? 'border-[var(--brand-color)] bg-[var(--brand-color)]/5' : 'border-neutral-100 hover:border-neutral-200'}`}>
+                  <input type="radio" name="payment" value="CASH" className="sr-only" checked={paymentMethod === 'CASH'} onChange={e => setPaymentMethod(e.target.value)} />
+                  <Banknote className={`w-8 h-8 mb-2 transition-colors ${paymentMethod === 'CASH' ? 'text-[var(--brand-color)]' : 'text-neutral-400'}`} />
+                  <span className={`text-sm font-medium transition-colors ${paymentMethod === 'CASH' ? 'text-[var(--brand-color)]' : 'text-neutral-600'}`}>Dinheiro</span>
+                  {paymentMethod === 'CASH' && <CheckCircle2 className="absolute top-2 right-2 w-4 h-4 text-[var(--brand-color)]" />}
                 </label>
               </div>
             </div>
@@ -268,18 +367,34 @@ function CheckoutModal({ tenantId, onClose }: { tenantId: string, onClose: () =>
         </div>
       </div>
       
-      <div className="p-4 bg-white border-t border-neutral-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-        <div className="flex justify-between items-center mb-4 text-neutral-900">
-          <span className="text-sm font-medium">Total a pagar</span>
-          <span className="text-xl font-bold">R$ {total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+      <div className="p-5 bg-white border-t border-neutral-100 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+        <div className="space-y-2 mb-4 text-sm">
+          <div className="flex justify-between text-neutral-500">
+            <span>Subtotal</span>
+            <span>R$ {total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+          </div>
+          {orderType === 'DELIVERY' && (
+            <div className="flex justify-between text-neutral-500">
+              <span>Taxa de Entrega</span>
+              <span className="text-emerald-500 font-medium">A calcular</span>
+            </div>
+          )}
+          <div className="flex justify-between items-center text-neutral-900 pt-3 border-t border-neutral-100 mt-3">
+            <span className="font-bold text-base">Total a pagar</span>
+            <span className="text-xl font-bold text-[var(--brand-color)]">R$ {total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+          </div>
         </div>
         <button 
           form="checkout-form"
           type="submit"
           disabled={loading}
-          className="w-full h-14 bg-[var(--brand-color)] text-white font-medium rounded-xl flex items-center justify-center hover:opacity-90 disabled:opacity-50"
+          className="w-full h-14 bg-[var(--brand-color)] text-white font-bold text-lg rounded-xl flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-70 transition-all active:scale-[0.98] shadow-lg shadow-[var(--brand-color)]/20"
         >
-          {loading ? 'Enviando...' : 'Fazer Pedido'}
+          {loading ? (
+            <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : (
+             <>Fazer Pedido <ChevronLeft className="w-5 h-5 rotate-180" /></>
+          )}
         </button>
       </div>
     </div>
@@ -329,24 +444,28 @@ export function PublicMenuClient({ tenant, categories, items }: { tenant: any, c
                     <div 
                       key={item.id} 
                       onClick={() => setSelectedItem(item)}
-                      className="bg-white rounded-2xl p-4 border border-neutral-100 shadow-sm flex space-x-4 cursor-pointer hover:border-[var(--brand-color)] hover:shadow-md transition-all active:scale-[0.98]"
+                      className="bg-white rounded-2xl p-3 border border-neutral-100 shadow-sm flex gap-3 cursor-pointer hover:border-[var(--brand-color)] hover:shadow-md transition-all active:scale-[0.98]"
                     >
-                      <div className="flex-1 flex flex-col justify-between">
+                      {item.image_url ? (
+                        <div className="w-24 h-24 flex-shrink-0 bg-neutral-100 rounded-xl overflow-hidden border border-neutral-100">
+                          <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                        </div>
+                      ) : (
+                        <div className="w-24 h-24 flex-shrink-0 bg-neutral-100 rounded-xl overflow-hidden border border-neutral-100 relative">
+                          <div className="absolute inset-0 bg-gradient-to-br from-neutral-200 to-neutral-300" />
+                        </div>
+                      )}
+                      <div className="flex-1 flex flex-col justify-between py-0.5">
                         <div>
-                          <h3 className="font-semibold text-neutral-900 text-sm">{item.name}</h3>
+                          <h3 className="font-semibold text-neutral-900 text-sm leading-tight">{item.name}</h3>
                           {item.description && (
-                            <p className="text-neutral-500 text-xs mt-1 line-clamp-2 leading-relaxed">{item.description}</p>
+                            <p className="text-neutral-500 text-[10px] sm:text-xs mt-1 line-clamp-2 leading-relaxed">{item.description}</p>
                           )}
                         </div>
-                        <div className="font-medium text-[var(--brand-color)] mt-3 text-sm">
+                        <div className="font-bold text-[var(--brand-color)] mt-2 text-sm">
                           R$ {item.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </div>
                       </div>
-                      {item.image_url && (
-                        <div className="w-24 h-24 flex-shrink-0 bg-neutral-50 rounded-xl overflow-hidden border border-neutral-100">
-                          <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
-                        </div>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -356,9 +475,9 @@ export function PublicMenuClient({ tenant, categories, items }: { tenant: any, c
         </div>
       </div>
 
-      {/* Floating Cart Button */}
+      {/* Floating Cart Button (Adjusted for Footer) */}
       {cartCount > 0 && (
-        <div className="fixed bottom-4 left-0 right-0 px-4 z-40 max-w-md mx-auto">
+        <div className="fixed bottom-20 left-0 right-0 px-4 z-40 max-w-md mx-auto">
           <button 
             onClick={() => setShowCheckout(true)}
             className="w-full h-14 bg-[var(--brand-color)] text-white rounded-2xl shadow-lg flex items-center justify-between px-6 active:scale-95 transition-transform"
@@ -375,6 +494,27 @@ export function PublicMenuClient({ tenant, categories, items }: { tenant: any, c
           </button>
         </div>
       )}
+
+      {/* Footer Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-neutral-200 flex items-center justify-around px-4 z-40 max-w-md mx-auto">
+         <button className="flex flex-col items-center justify-center text-[var(--brand-color)]">
+           <Store className="w-5 h-5 mb-1" />
+           <span className="text-[10px] font-medium">Cardápio</span>
+         </button>
+         <button className="flex flex-col items-center justify-center text-neutral-400">
+           <Search className="w-5 h-5 mb-1" />
+           <span className="text-[10px] font-medium">Busca</span>
+         </button>
+         <button onClick={() => setShowCheckout(true)} className="flex flex-col items-center justify-center text-neutral-400 relative">
+           <ShoppingBag className="w-5 h-5 mb-1" />
+           <span className="text-[10px] font-medium">Sacola</span>
+           {cartCount > 0 && (
+             <span className="absolute -top-1 -right-2 bg-[var(--brand-color)] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+               {cartCount}
+             </span>
+           )}
+         </button>
+      </div>
 
       {/* Modals */}
       {selectedItem && <ProductModal item={selectedItem} onClose={() => setSelectedItem(null)} />}
