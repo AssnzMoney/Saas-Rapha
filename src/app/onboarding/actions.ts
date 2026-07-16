@@ -22,14 +22,20 @@ export async function createTenant(formData: FormData) {
     .single();
 
   if (!tenantError && tenant) {
-    // Create the user profile linked to this tenant
-    await supabaseServer
+    // O trigger do Supabase já cria o profile, então devemos fazer um UPDATE em vez de INSERT
+    const { error: profileError } = await supabaseServer
       .from("profiles")
-      .insert({
-        user_id: user.id,
+      .update({
         tenant_id: tenant.id,
         role: "admin",
-      });
+      })
+      .eq('user_id', user.id)
+      .is('tenant_id', null);
+
+    if (profileError) {
+      console.error("ERRO AO ATUALIZAR PROFILE:", profileError);
+      throw new Error(`Erro ao vincular loja: ${profileError.message}`);
+    }
 
     redirect("/admin");
   } else {

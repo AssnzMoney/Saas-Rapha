@@ -11,11 +11,12 @@ export default async function AdminDashboard() {
 
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
+  const { data: profiles } = await supabase
     .from('profiles')
     .select('*, tenants(*)')
     .eq('user_id', user.id)
-    .single()
+    .limit(1)
+  const profile = profiles?.[0]
 
   const userName = profile?.full_name?.split(' ')[0] || 'Lojista';
   const storeName = profile?.tenants?.name || 'sua loja';

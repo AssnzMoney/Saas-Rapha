@@ -27,12 +27,15 @@ export default async function AdminLayout({
     redirect('/login')
   }
 
-  // Fetch the user's profile and tenant
-  const { data: profile } = await supabase
+  // Fetch the user's profile and tenant (limit 1 to avoid errors if multiple exist)
+  const { data: profiles } = await supabase
     .from('profiles')
     .select('*, tenants(*)')
     .eq('user_id', user.id)
-    .single()
+    .not('tenant_id', 'is', null)
+    .limit(1)
+
+  const profile = profiles?.[0]
 
   // Se o perfil do usuário não tiver um tenant_id (ou nem existir o perfil ainda), 
   // bloqueia o acesso à dashboard e força o redirecionamento.

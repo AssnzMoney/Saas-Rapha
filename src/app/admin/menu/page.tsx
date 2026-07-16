@@ -10,11 +10,12 @@ export default async function MenuPage() {
   if (!user) redirect('/login')
 
   // Get Tenant ID
-  const { data: profile } = await supabase
+  const { data: profiles } = await supabase
     .from('profiles')
     .select('tenant_id')
     .eq('user_id', user.id)
-    .single()
+    .limit(1)
+  const profile = profiles?.[0]
     
   if (!profile || !profile.tenant_id) {
     // If somehow has no tenant, send back to onboarding

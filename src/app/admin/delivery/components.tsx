@@ -71,6 +71,57 @@ export function DeliverySettingsForm({ initialData }: { initialData: any }) {
           </p>
         </div>
 
+        <div className="pt-6 border-t border-neutral-100">
+          <h3 className="text-sm font-medium text-neutral-900 mb-4">Formas de Pagamento Aceitas</h3>
+          
+          <div className="space-y-4 max-w-md">
+            <label className="flex items-center justify-between p-3 border border-neutral-200 rounded-lg cursor-pointer hover:bg-neutral-50 transition-colors">
+              <div>
+                <span className="block text-sm font-medium text-neutral-900">Pix Online</span>
+                <span className="block text-xs text-neutral-500">Pagamento pelo celular, recebe na hora</span>
+              </div>
+              <div className="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                <input type="checkbox" name="acceptsPix" id="acceptsPix" defaultChecked={initialData.accepts_pix ?? true} className="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer" style={{ right: initialData.accepts_pix === false ? 'auto' : 0, left: initialData.accepts_pix === false ? 0 : 'auto', borderColor: initialData.accepts_pix === false ? '#d1d5db' : '#10b981', backgroundColor: initialData.accepts_pix === false ? '#d1d5db' : '#10b981' }} onChange={(e) => {
+                    const el = e.target;
+                    if(el.checked){ el.style.right = '0'; el.style.left = 'auto'; el.style.borderColor = '#10b981'; el.style.backgroundColor = '#10b981'; }
+                    else { el.style.left = '0'; el.style.right = 'auto'; el.style.borderColor = '#d1d5db'; el.style.backgroundColor = '#d1d5db'; }
+                }} />
+                <label htmlFor="acceptsPix" className="toggle-label block overflow-hidden h-5 rounded-full bg-neutral-200 cursor-pointer"></label>
+              </div>
+            </label>
+
+            <label className="flex items-center justify-between p-3 border border-neutral-200 rounded-lg cursor-pointer hover:bg-neutral-50 transition-colors">
+              <div>
+                <span className="block text-sm font-medium text-neutral-900">Maquininha (Cartão)</span>
+                <span className="block text-xs text-neutral-500">Na entrega ou retirada</span>
+              </div>
+              <div className="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                <input type="checkbox" name="acceptsCard" id="acceptsCard" defaultChecked={initialData.accepts_card ?? true} className="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer" style={{ right: initialData.accepts_card === false ? 'auto' : 0, left: initialData.accepts_card === false ? 0 : 'auto', borderColor: initialData.accepts_card === false ? '#d1d5db' : '#10b981', backgroundColor: initialData.accepts_card === false ? '#d1d5db' : '#10b981' }} onChange={(e) => {
+                    const el = e.target;
+                    if(el.checked){ el.style.right = '0'; el.style.left = 'auto'; el.style.borderColor = '#10b981'; el.style.backgroundColor = '#10b981'; }
+                    else { el.style.left = '0'; el.style.right = 'auto'; el.style.borderColor = '#d1d5db'; el.style.backgroundColor = '#d1d5db'; }
+                }} />
+                <label htmlFor="acceptsCard" className="toggle-label block overflow-hidden h-5 rounded-full bg-neutral-200 cursor-pointer"></label>
+              </div>
+            </label>
+
+            <label className="flex items-center justify-between p-3 border border-neutral-200 rounded-lg cursor-pointer hover:bg-neutral-50 transition-colors">
+              <div>
+                <span className="block text-sm font-medium text-neutral-900">Dinheiro</span>
+                <span className="block text-xs text-neutral-500">Na entrega ou retirada</span>
+              </div>
+              <div className="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                <input type="checkbox" name="acceptsCash" id="acceptsCash" defaultChecked={initialData.accepts_cash ?? true} className="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer" style={{ right: initialData.accepts_cash === false ? 'auto' : 0, left: initialData.accepts_cash === false ? 0 : 'auto', borderColor: initialData.accepts_cash === false ? '#d1d5db' : '#10b981', backgroundColor: initialData.accepts_cash === false ? '#d1d5db' : '#10b981' }} onChange={(e) => {
+                    const el = e.target;
+                    if(el.checked){ el.style.right = '0'; el.style.left = 'auto'; el.style.borderColor = '#10b981'; el.style.backgroundColor = '#10b981'; }
+                    else { el.style.left = '0'; el.style.right = 'auto'; el.style.borderColor = '#d1d5db'; el.style.backgroundColor = '#d1d5db'; }
+                }} />
+                <label htmlFor="acceptsCash" className="toggle-label block overflow-hidden h-5 rounded-full bg-neutral-200 cursor-pointer"></label>
+              </div>
+            </label>
+          </div>
+        </div>
+
         <div className="pt-4 border-t border-neutral-100 flex justify-start">
           <button
             type="submit"

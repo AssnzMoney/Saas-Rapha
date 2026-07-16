@@ -9,11 +9,12 @@ export default async function AiAgentPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
+  const { data: profiles } = await supabase
     .from('profiles')
     .select('tenant_id')
     .eq('user_id', user.id)
-    .single()
+    .limit(1)
+  const profile = profiles?.[0]
     
   if (!profile || !profile.tenant_id) redirect('/admin/onboarding')
 
