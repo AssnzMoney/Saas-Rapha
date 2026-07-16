@@ -158,7 +158,16 @@ export function AiAgentClient({ tenant }: { tenant: any }) {
         <div className="space-y-6">
           
           {/* Conexão WhatsApp */}
-          <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm transition-all duration-300 hover:shadow-md">
+          <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm relative overflow-hidden group">
+            {/* Lock Overlay */}
+            <div className="absolute inset-0 bg-white/50 backdrop-blur-[3px] z-20 flex flex-col items-center justify-center transition-all duration-300">
+              <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-95 group-hover:scale-100 flex flex-col items-center">
+                <p className="text-neutral-800 font-bold mb-3 text-sm">Recurso Bloqueado</p>
+                <a href="https://wa.me/5511999999999?text=Olá, quero liberar o Agente WhatsApp no meu restaurante!" target="_blank" rel="noreferrer" className="bg-emerald-500 text-white text-sm font-bold px-6 py-2.5 rounded-full shadow-md hover:bg-emerald-600 transition-colors cursor-pointer flex items-center gap-2">
+                  <Smartphone className="w-4 h-4" /> Entrar em contato com suporte
+                </a>
+              </div>
+            </div>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3">
                 <div className="p-2 bg-emerald-100 text-emerald-600 rounded-lg"><Smartphone className="w-5 h-5" /></div>
@@ -228,7 +237,16 @@ export function AiAgentClient({ tenant }: { tenant: any }) {
             )}
           </div>
 
-          <form onSubmit={handleSave} className="space-y-6 bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm">
+          <form onSubmit={handleSave} className="space-y-6 bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm relative overflow-hidden group">
+            {/* Lock Overlay */}
+            <div className="absolute inset-0 bg-white/50 backdrop-blur-[3px] z-20 flex flex-col items-center justify-center transition-all duration-300">
+              <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-95 group-hover:scale-100 flex flex-col items-center">
+                <p className="text-neutral-800 font-bold mb-3 text-sm">Recurso Bloqueado</p>
+                <a href="https://wa.me/5511999999999?text=Olá, quero configurar o comportamento do Agente IA!" target="_blank" rel="noreferrer" className="bg-emerald-500 text-white text-sm font-bold px-6 py-2.5 rounded-full shadow-md hover:bg-emerald-600 transition-colors cursor-pointer flex items-center gap-2">
+                  <Bot className="w-4 h-4" /> Entrar em contato com suporte
+                </a>
+              </div>
+            </div>
 
             <div className="pt-6 border-t border-neutral-100 flex items-center space-x-3 mb-2">
               <div className="p-2 bg-purple-100 text-purple-600 rounded-lg"><Bot className="w-5 h-5" /></div>
@@ -254,7 +272,24 @@ export function AiAgentClient({ tenant }: { tenant: any }) {
         </div>
 
         {/* Lado Direito: Simulador de Chat WhatsApp Style */}
-        <div>
+        <div className="flex flex-col space-y-4">
+          
+          {/* Header do Simulador */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-purple-100 text-purple-600 rounded-lg shrink-0">
+                <Bot className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg leading-tight">Simulador do Agente</h3>
+                <p className="text-sm text-neutral-500">Veja como a IA vai conversar com os clientes.</p>
+              </div>
+            </div>
+            <div className="hidden sm:flex px-3 py-1 bg-neutral-100 text-neutral-600 text-[11px] font-bold rounded-full uppercase tracking-wider shrink-0">
+              Preview
+            </div>
+          </div>
+
           <div className="bg-[#EFEAE2] rounded-3xl shadow-lg border border-neutral-200 h-[650px] flex flex-col relative overflow-hidden ring-4 ring-neutral-100">
             {/* Header do WhatsApp */}
             <div className="bg-[#00A884] text-white px-4 py-3 flex items-center justify-between z-10 shadow-sm">

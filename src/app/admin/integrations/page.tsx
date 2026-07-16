@@ -1,20 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import { getCachedProfile } from '@/lib/dal'
 import IntegrationsSection from '@/components/ui/integrations-component'
+import { redirect } from 'next/navigation'
 
 export default async function IntegrationsPage() {
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    redirect('/login')
-  }
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('tenant_id')
-    .eq('user_id', user.id)
-    .single()
+  const { profile } = await getCachedProfile()
 
   if (!profile || !profile.tenant_id) {
     redirect('/onboarding')

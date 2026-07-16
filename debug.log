@@ -418,3 +418,21 @@
     "tenantId": "2a87dcd2-f6ae-4c70-a67b-e39bd48aef7f"
   }
 }
+{
+  "event": "ROUTE_HIT",
+  "body": {
+    "messages": [
+      {
+        "id": "1",
+        "role": "assistant",
+        "content": "Olá! Sou o seu robô simulado.\n\nDiga um \"oi\" para testar minha conexão com seu cardápio."
+      },
+      {
+        "id": "1784240980272",
+        "role": "user",
+        "content": "oi"
+      }
+    ],
+    "tenantId": "8b67aa3f-617c-4a27-9278-fb945b52ef5e"
+  }
+}

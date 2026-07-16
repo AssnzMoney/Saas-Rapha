@@ -405,7 +405,8 @@ function CheckoutModal({ tenantId, onClose }: { tenantId: string, onClose: () =>
 export function PublicMenuClient({ tenant, categories, items }: { tenant: any, categories: any[], items: any[] }) {
   const [selectedItem, setSelectedItem] = useState<any | null>(null)
   const [showCheckout, setShowCheckout] = useState(false)
-  const { totalItems, totalPrice, setTenantId } = useCartStore()
+  const [searchQuery, setSearchQuery] = useState('')
+  const { totalItems, totalPrice, setTenantId, isSearchOpen: showSearch, closeSearch, openSearch } = useCartStore()
 
   useEffect(() => {
     setTenantId(tenant.id)
@@ -497,15 +498,15 @@ export function PublicMenuClient({ tenant, categories, items }: { tenant: any, c
 
       {/* Footer Navigation */}
       <div className="fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-neutral-200 flex items-center justify-around px-4 z-40 max-w-md mx-auto">
-         <button className="flex flex-col items-center justify-center text-[var(--brand-color)]">
+         <button onClick={() => setShowCheckout(false)} className={`flex flex-col items-center justify-center ${!showSearch && !showCheckout ? 'text-[var(--brand-color)]' : 'text-neutral-400'}`}>
            <Store className="w-5 h-5 mb-1" />
            <span className="text-[10px] font-medium">Cardápio</span>
          </button>
-         <button className="flex flex-col items-center justify-center text-neutral-400">
+         <button onClick={openSearch} className={`flex flex-col items-center justify-center ${showSearch ? 'text-[var(--brand-color)]' : 'text-neutral-400'}`}>
            <Search className="w-5 h-5 mb-1" />
            <span className="text-[10px] font-medium">Busca</span>
          </button>
-         <button onClick={() => setShowCheckout(true)} className="flex flex-col items-center justify-center text-neutral-400 relative">
+         <button onClick={() => setShowCheckout(true)} className={`flex flex-col items-center justify-center relative ${showCheckout ? 'text-[var(--brand-color)]' : 'text-neutral-400'}`}>
            <ShoppingBag className="w-5 h-5 mb-1" />
            <span className="text-[10px] font-medium">Sacola</span>
            {cartCount > 0 && (
@@ -519,6 +520,57 @@ export function PublicMenuClient({ tenant, categories, items }: { tenant: any, c
       {/* Modals */}
       {selectedItem && <ProductModal item={selectedItem} onClose={() => setSelectedItem(null)} />}
       {showCheckout && <CheckoutModal tenantId={tenant.id} onClose={() => setShowCheckout(false)} />}
+      
+      {/* Search Modal */}
+      {showSearch && (
+        <div className="fixed inset-0 z-50 flex flex-col bg-white animate-in slide-in-from-bottom sm:slide-in-from-right duration-300 sm:max-w-md sm:right-0 sm:left-auto sm:border-l sm:border-neutral-200">
+          <header className="h-16 flex items-center px-4 border-b border-neutral-100 bg-white sticky top-0 gap-3">
+            <button onClick={closeSearch} className="p-2 -ml-2 text-neutral-600 hover:text-neutral-900">
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-2.5 w-5 h-5 text-neutral-400" />
+              <input 
+                autoFocus
+                type="text" 
+                placeholder="Buscar produtos..." 
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full bg-neutral-100 rounded-full py-2.5 pl-10 pr-4 outline-none text-sm focus:ring-2 focus:ring-[var(--brand-color)]"
+              />
+            </div>
+          </header>
+          <div className="flex-1 overflow-y-auto bg-neutral-50 p-4 space-y-3">
+            {searchQuery.trim() === '' ? (
+              <div className="text-center text-neutral-500 mt-10 text-sm">
+                Digite algo para buscar no cardápio.
+              </div>
+            ) : (
+              items
+                .filter(i => i.name.toLowerCase().includes(searchQuery.toLowerCase()) || i.description?.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map((item) => (
+                  <div 
+                    key={item.id} 
+                    onClick={() => { setSelectedItem(item); closeSearch(); }}
+                    className="bg-white rounded-xl p-3 border border-neutral-100 shadow-sm flex gap-3 cursor-pointer hover:border-[var(--brand-color)]"
+                  >
+                    {item.image_url && (
+                      <div className="w-20 h-20 flex-shrink-0 bg-neutral-100 rounded-lg overflow-hidden border border-neutral-100">
+                        <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                    <div className="flex-1 flex flex-col justify-center">
+                      <h3 className="font-bold text-neutral-900 text-sm leading-tight">{item.name}</h3>
+                      <div className="font-bold text-[var(--brand-color)] mt-1 text-sm">
+                        R$ {item.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </div>
+                    </div>
+                  </div>
+                ))
+            )}
+          </div>
+        </div>
+      )}
     </>
   )
 }

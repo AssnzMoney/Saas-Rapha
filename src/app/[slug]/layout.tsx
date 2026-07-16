@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import { Menu, Search, Clock, MapPin } from 'lucide-react'
+import { Menu, Clock, MapPin } from 'lucide-react'
+import { SearchTrigger } from './search-trigger'
 import type { Metadata } from 'next'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -50,10 +51,7 @@ export default async function PublicMenuLayout({
             <div className="w-6 h-6"></div> {/* Spacer for balance */}
           </div>
           
-          <div className="relative z-10 mt-5 bg-white/10 backdrop-blur-md rounded-full px-4 py-3 flex items-center text-sm border border-white/20">
-            <Search className="w-5 h-5 mr-3 opacity-70" />
-            <span className="opacity-70">O que você quer pedir?</span>
-          </div>
+          <SearchTrigger />
         </header>
 
         {/* Store Info Banner */}

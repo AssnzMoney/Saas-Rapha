@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import { getCachedProfile } from '@/lib/dal'
 import { OrderManager } from './components'
 
 // Adicionar flag para Next.js revalidar a página a cada 5 segundos
@@ -9,16 +9,7 @@ export const revalidate = 5
 export default async function OrdersPage() {
   const supabase = await createClient()
   
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('tenant_id')
-    .eq('user_id', user.id)
-    .single()
-    
-  if (!profile || !profile.tenant_id) redirect('/admin/onboarding')
+  const { profile } = await getCachedProfile()
 
   // Buscar pedidos com os itens detalhados
   const { data: orders } = await supabase

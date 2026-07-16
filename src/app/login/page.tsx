@@ -1,11 +1,12 @@
 import { LoginPageComponent } from '@/components/ui/animated-characters-login-page'
 
-export default function LoginPage({
+export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: { error?: string; message?: string }
+  searchParams: Promise<{ error?: string; message?: string }>
 }) {
+  const resolvedSearchParams = await searchParams
   return (
-    <LoginPageComponent serverError={searchParams?.error ? (searchParams.message || 'Ocorreu um erro.') : undefined} />
+    <LoginPageComponent serverError={resolvedSearchParams?.error ? (resolvedSearchParams.message || 'Ocorreu um erro.') : undefined} />
   )
 }

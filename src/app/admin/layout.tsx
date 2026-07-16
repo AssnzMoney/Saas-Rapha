@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { getCachedProfile } from '@/lib/dal'
 import Link from 'next/link'
 import { 
   LayoutDashboard, 
@@ -19,26 +19,8 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-
-  // Protect the /admin route
-  const { data: { user }, error } = await supabase.auth.getUser()
-  if (error || !user) {
-    redirect('/login')
-  }
-
-  // Fetch the user's profile and tenant
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*, tenants(*)')
-    .eq('user_id', user.id)
-    .single()
-
-  // Se o perfil do usuário não tiver um tenant_id (ou nem existir o perfil ainda), 
-  // bloqueia o acesso à dashboard e força o redirecionamento.
-  if (!profile || !profile.tenant_id) {
-    redirect('/onboarding')
-  }
+  // Fetch the user's profile and tenant using the cached DAL
+  const { profile } = await getCachedProfile()
 
   return (
     <div className="flex h-screen bg-neutral-50 overflow-hidden">

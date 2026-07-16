@@ -19,11 +19,17 @@ interface CartStore {
   clearCart: () => void
   totalItems: () => number
   totalPrice: () => number
+  isSearchOpen: boolean
+  openSearch: () => void
+  closeSearch: () => void
 }
 
 export const useCartStore = create<CartStore>((set, get) => ({
   items: [],
   tenantId: null,
+  isSearchOpen: false,
+  openSearch: () => set({ isSearchOpen: true }),
+  closeSearch: () => set({ isSearchOpen: false }),
   setTenantId: (id) => set({ tenantId: id }),
   
   addItem: (item) => {

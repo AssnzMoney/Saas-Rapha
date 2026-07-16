@@ -1,9 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import { getCachedProfile } from '@/lib/dal'
 import { Clock, TrendingUp, Users, ShoppingBag, ArrowUpRight, MessageCircle, Sparkles } from 'lucide-react'
 import { DashboardChart } from '@/components/ui/dashboard-chart'
 import { RecentCustomers } from '@/components/ui/recent-customers'
 import { SpotlightCard } from '@/components/ui/spotlight-card'
+import { redirect } from 'next/navigation'
 
 export default async function AdminDashboard() {
   const supabase = await createClient()
@@ -11,14 +12,9 @@ export default async function AdminDashboard() {
 
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*, tenants(*)')
-    .eq('user_id', user.id)
-    .single()
-
-  const userName = profile?.full_name?.split(' ')[0] || 'Lojista';
-  const storeName = profile?.tenants?.name || 'sua loja';
+  const { profile } = await getCachedProfile()
+  const userName = profile?.full_name?.split(' ')[0] || 'Lojista'
+  const storeName = profile?.tenants?.name || 'sua loja'
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">

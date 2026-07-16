@@ -1,21 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import { getCachedProfile } from '@/lib/dal'
 import { MenuManager } from './components'
+import { redirect } from 'next/navigation'
 
 export default async function MenuPage() {
   const supabase = await createClient()
   
   // Get User
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  // Get Tenant ID
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('tenant_id')
-    .eq('user_id', user.id)
-    .single()
-    
+  const { profile } = await getCachedProfile()
   if (!profile || !profile.tenant_id) {
     // If somehow has no tenant, send back to onboarding
     redirect('/admin/onboarding')
