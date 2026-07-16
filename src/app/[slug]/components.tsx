@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useCartStore } from '@/store/cart'
-import { ShoppingBag, ChevronLeft, Plus, Minus, X, CheckCircle2, Store, Search, User, Phone, MapPin, Hash, CreditCard, Banknote, QrCode, Truck, PackageOpen, Map, Copy } from 'lucide-react'
+import { ShoppingBag, ChevronLeft, Plus, Minus, X, CheckCircle2, Store, Search, User, Phone, MapPin, Hash, CreditCard, Banknote, QrCode, Truck, PackageOpen, Map, Copy, Clock } from 'lucide-react'
 import { submitOrder } from './actions'
+import { useUIStore } from '@/store/ui'
 
 // --- 1. Product Modal ---
 function ProductModal({ item, onClose }: { item: any, onClose: () => void }) {
@@ -100,7 +101,7 @@ function ProductModal({ item, onClose }: { item: any, onClose: () => void }) {
 }
 
 // --- 2. Checkout Modal ---
-function CheckoutModal({ tenantId, onClose }: { tenantId: string, onClose: () => void }) {
+function CheckoutModal({ tenantId, acceptedMethods, onClose }: { tenantId: string, acceptedMethods: { pix: boolean, card: boolean, cash: boolean }, onClose: () => void }) {
   const { items, totalPrice, clearCart } = useCartStore()
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -108,11 +109,46 @@ function CheckoutModal({ tenantId, onClose }: { tenantId: string, onClose: () =>
   // Checkout Form State
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value;
+    
+    // Se estiver apagando e sobrar pouco, deixa livre para não "prender" o usuário no +55
+    if (val.length < 4) {
+      setPhone(val.replace(/\D/g, ''));
+      return;
+    }
+
+    let v = val.replace(/\D/g, '');
+    if (!v.startsWith('55')) v = '55' + v;
+
+    let formatted = '+55 ';
+    let rest = v.slice(2);
+
+    if (rest.length > 0) {
+      formatted += `(${rest.slice(0, 2)}`;
+    }
+    if (rest.length > 2) {
+      if (rest.length <= 10) {
+        formatted += `) ${rest.slice(2, 6)}`;
+        if (rest.length > 6) formatted += `-${rest.slice(6)}`;
+      } else {
+        formatted += `) ${rest.slice(2, 7)}`;
+        if (rest.length > 7) formatted += `-${rest.slice(7, 11)}`;
+      }
+    }
+    
+    setPhone(formatted);
+  };
   const [street, setStreet] = useState('')
   const [number, setNumber] = useState('')
   const [neighborhood, setNeighborhood] = useState('')
   const [orderType, setOrderType] = useState<'DELIVERY'|'PICKUP'>('DELIVERY')
-  const [paymentMethod, setPaymentMethod] = useState('PIX') // PIX, CARD, CASH
+  const [paymentMethod, setPaymentMethod] = useState(
+    acceptedMethods.pix ? 'PIX' : 
+    acceptedMethods.card ? 'CARD' : 
+    acceptedMethods.cash ? 'CASH' : ''
+  )
   const [copied, setCopied] = useState(false)
 
   const [pixData, setPixData] = useState<{qrCode: string, qrCodeBase64: string} | null>(null)
@@ -157,10 +193,14 @@ function CheckoutModal({ tenantId, onClose }: { tenantId: string, onClose: () =>
             return
           } else {
             alert('Erro ao gerar PIX: ' + (mpData.error || 'Tente novamente.'))
+            setLoading(false)
+            return
           }
         } catch (err) {
           console.error(err)
           alert('Erro ao processar pagamento.')
+          setLoading(false)
+          return
         }
       }
 
@@ -299,7 +339,7 @@ function CheckoutModal({ tenantId, onClose }: { tenantId: string, onClose: () =>
                 </div>
                 <div className="relative">
                   <Phone className="absolute left-3 top-3.5 w-5 h-5 text-neutral-400" />
-                  <input required type="tel" placeholder="Telefone / WhatsApp" value={phone} onChange={e => setPhone(e.target.value)}
+                  <input required type="tel" placeholder="Telefone / WhatsApp" value={phone} onChange={handlePhoneChange} maxLength={19}
                     className="w-full rounded-xl border border-neutral-200 pl-10 pr-4 py-3 text-sm focus:border-[var(--brand-color)] focus:ring-[var(--brand-color)] transition-all bg-neutral-50 focus:bg-white" />
                 </div>
               </div>
@@ -321,7 +361,7 @@ function CheckoutModal({ tenantId, onClose }: { tenantId: string, onClose: () =>
                   <div className="flex gap-3">
                     <div className="relative w-1/3">
                       <Hash className="absolute left-3 top-3.5 w-5 h-5 text-neutral-400" />
-                      <input required={orderType === 'DELIVERY'} type="text" placeholder="Nº" value={number} onChange={e => setNumber(e.target.value)}
+                      <input required={orderType === 'DELIVERY'} type="text" placeholder="Nº" value={number} onChange={e => setNumber(e.target.value.replace(/\D/g, ''))}
                         className="w-full rounded-xl border border-neutral-200 pl-10 pr-4 py-3 text-sm focus:border-[var(--brand-color)] focus:ring-[var(--brand-color)] transition-all bg-neutral-50 focus:bg-white" />
                     </div>
                     <div className="relative w-2/3">
@@ -340,27 +380,59 @@ function CheckoutModal({ tenantId, onClose }: { tenantId: string, onClose: () =>
                 <CreditCard className="w-5 h-5 text-[var(--brand-color)]" />
                 Forma de Pagamento
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <label className={`relative flex flex-col items-center p-4 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === 'PIX' ? 'border-[var(--brand-color)] bg-[var(--brand-color)]/5' : 'border-neutral-100 hover:border-neutral-200'}`}>
-                  <input type="radio" name="payment" value="PIX" className="sr-only" checked={paymentMethod === 'PIX'} onChange={e => setPaymentMethod(e.target.value)} />
-                  <QrCode className={`w-8 h-8 mb-2 transition-colors ${paymentMethod === 'PIX' ? 'text-[var(--brand-color)]' : 'text-neutral-400'}`} />
-                  <span className={`text-sm font-medium transition-colors ${paymentMethod === 'PIX' ? 'text-[var(--brand-color)]' : 'text-neutral-600'}`}>Pix</span>
-                  {paymentMethod === 'PIX' && <CheckCircle2 className="absolute top-2 right-2 w-4 h-4 text-[var(--brand-color)]" />}
-                </label>
-                
-                <label className={`relative flex flex-col items-center p-4 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === 'CARD' ? 'border-[var(--brand-color)] bg-[var(--brand-color)]/5' : 'border-neutral-100 hover:border-neutral-200'}`}>
-                  <input type="radio" name="payment" value="CARD" className="sr-only" checked={paymentMethod === 'CARD'} onChange={e => setPaymentMethod(e.target.value)} />
-                  <CreditCard className={`w-8 h-8 mb-2 transition-colors ${paymentMethod === 'CARD' ? 'text-[var(--brand-color)]' : 'text-neutral-400'}`} />
-                  <span className={`text-sm font-medium transition-colors ${paymentMethod === 'CARD' ? 'text-[var(--brand-color)]' : 'text-neutral-600'}`}>Cartão</span>
-                  {paymentMethod === 'CARD' && <CheckCircle2 className="absolute top-2 right-2 w-4 h-4 text-[var(--brand-color)]" />}
-                </label>
+              
+              <div className="space-y-5">
+                {acceptedMethods.pix && (
+                  <div>
+                    <div className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-3">
+                      Pagamento Online
+                    </div>
+                    <div className="grid grid-cols-1 gap-3">
+                      <label className={`relative flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === 'PIX' ? 'border-[var(--brand-color)] bg-[var(--brand-color)]/5' : 'border-neutral-100 hover:border-neutral-200'}`}>
+                        <input type="radio" name="payment" value="PIX" className="sr-only" checked={paymentMethod === 'PIX'} onChange={e => setPaymentMethod(e.target.value)} />
+                        <div className="flex items-center gap-4 flex-1">
+                          <QrCode className={`w-6 h-6 transition-colors ${paymentMethod === 'PIX' ? 'text-[var(--brand-color)]' : 'text-neutral-400'}`} />
+                          <div className="flex flex-col">
+                            <span className={`text-sm font-bold transition-colors ${paymentMethod === 'PIX' ? 'text-[var(--brand-color)]' : 'text-neutral-700'}`}>Pix (Pagar Agora)</span>
+                            <span className="text-xs text-neutral-500">Aprovação imediata no celular</span>
+                          </div>
+                        </div>
+                        {paymentMethod === 'PIX' && <CheckCircle2 className="w-5 h-5 text-[var(--brand-color)]" />}
+                      </label>
+                    </div>
+                  </div>
+                )}
 
-                <label className={`relative flex flex-col items-center p-4 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === 'CASH' ? 'border-[var(--brand-color)] bg-[var(--brand-color)]/5' : 'border-neutral-100 hover:border-neutral-200'}`}>
-                  <input type="radio" name="payment" value="CASH" className="sr-only" checked={paymentMethod === 'CASH'} onChange={e => setPaymentMethod(e.target.value)} />
-                  <Banknote className={`w-8 h-8 mb-2 transition-colors ${paymentMethod === 'CASH' ? 'text-[var(--brand-color)]' : 'text-neutral-400'}`} />
-                  <span className={`text-sm font-medium transition-colors ${paymentMethod === 'CASH' ? 'text-[var(--brand-color)]' : 'text-neutral-600'}`}>Dinheiro</span>
-                  {paymentMethod === 'CASH' && <CheckCircle2 className="absolute top-2 right-2 w-4 h-4 text-[var(--brand-color)]" />}
-                </label>
+                {(acceptedMethods.card || acceptedMethods.cash) && (
+                  <div>
+                    <div className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-3">
+                      {orderType === 'DELIVERY' ? 'Pagamento na Entrega' : 'Pagamento na Retirada'}
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {acceptedMethods.card && (
+                        <label className={`relative flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === 'CARD' ? 'border-[var(--brand-color)] bg-[var(--brand-color)]/5' : 'border-neutral-100 hover:border-neutral-200'}`}>
+                          <input type="radio" name="payment" value="CARD" className="sr-only" checked={paymentMethod === 'CARD'} onChange={e => setPaymentMethod(e.target.value)} />
+                          <div className="flex items-center gap-3 flex-1">
+                            <CreditCard className={`w-5 h-5 transition-colors ${paymentMethod === 'CARD' ? 'text-[var(--brand-color)]' : 'text-neutral-400'}`} />
+                            <span className={`text-sm font-semibold transition-colors ${paymentMethod === 'CARD' ? 'text-[var(--brand-color)]' : 'text-neutral-700'}`}>Maquininha (Cartão)</span>
+                          </div>
+                          {paymentMethod === 'CARD' && <CheckCircle2 className="w-5 h-5 text-[var(--brand-color)]" />}
+                        </label>
+                      )}
+
+                      {acceptedMethods.cash && (
+                        <label className={`relative flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === 'CASH' ? 'border-[var(--brand-color)] bg-[var(--brand-color)]/5' : 'border-neutral-100 hover:border-neutral-200'}`}>
+                          <input type="radio" name="payment" value="CASH" className="sr-only" checked={paymentMethod === 'CASH'} onChange={e => setPaymentMethod(e.target.value)} />
+                          <div className="flex items-center gap-3 flex-1">
+                            <Banknote className={`w-5 h-5 transition-colors ${paymentMethod === 'CASH' ? 'text-[var(--brand-color)]' : 'text-neutral-400'}`} />
+                            <span className={`text-sm font-semibold transition-colors ${paymentMethod === 'CASH' ? 'text-[var(--brand-color)]' : 'text-neutral-700'}`}>Dinheiro</span>
+                          </div>
+                          {paymentMethod === 'CASH' && <CheckCircle2 className="w-5 h-5 text-[var(--brand-color)]" />}
+                        </label>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </form>
@@ -405,8 +477,14 @@ function CheckoutModal({ tenantId, onClose }: { tenantId: string, onClose: () =>
 export function PublicMenuClient({ tenant, categories, items }: { tenant: any, categories: any[], items: any[] }) {
   const [selectedItem, setSelectedItem] = useState<any | null>(null)
   const [showCheckout, setShowCheckout] = useState(false)
+  const { totalItems, totalPrice, setTenantId } = useCartStore()
+  
+  const isSearchOpen = useUIStore((state) => state.isSearchOpen)
+  const setSearchOpen = useUIStore((state) => state.setSearchOpen)
+  const isMenuOpen = useUIStore((state) => state.isMenuOpen)
+  const setMenuOpen = useUIStore((state) => state.setMenuOpen)
+  
   const [searchQuery, setSearchQuery] = useState('')
-  const { totalItems, totalPrice, setTenantId, isSearchOpen: showSearch, closeSearch, openSearch } = useCartStore()
 
   useEffect(() => {
     setTenantId(tenant.id)
@@ -417,14 +495,14 @@ export function PublicMenuClient({ tenant, categories, items }: { tenant: any, c
 
   return (
     <>
-      <div className="pb-8">
+      <div className="pb-32 bg-neutral-50 min-h-screen">
         {/* Horizontal Category Scroller */}
-        <div className="sticky top-0 z-10 bg-white border-b border-neutral-100 px-4 py-3 flex space-x-4 overflow-x-auto scrollbar-hide">
+        <div className="sticky top-[118px] z-10 bg-white/95 backdrop-blur-md border-b border-neutral-100/50 px-4 py-3 flex space-x-3 overflow-x-auto scrollbar-hide shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
           {categories.map((cat) => (
             <a 
               key={cat.id} 
               href={`#cat-${cat.id}`}
-              className="flex-shrink-0 px-4 py-2 rounded-full bg-neutral-100 text-neutral-700 font-medium text-sm hover:bg-neutral-200 transition-colors"
+              className="flex-shrink-0 px-4 py-1.5 rounded-full bg-neutral-50 border border-neutral-100 text-neutral-600 font-medium text-sm hover:border-[var(--brand-color)] hover:text-[var(--brand-color)] hover:bg-[var(--brand-color)]/5 transition-all shadow-sm active:scale-95"
             >
               {cat.name}
             </a>
@@ -438,35 +516,48 @@ export function PublicMenuClient({ tenant, categories, items }: { tenant: any, c
             if (catItems.length === 0) return null
 
             return (
-              <section key={cat.id} id={`cat-${cat.id}`} className="scroll-mt-24">
-                <h2 className="text-xl font-bold text-neutral-900 mb-4">{cat.name}</h2>
+              <section key={cat.id} id={`cat-${cat.id}`} className="scroll-mt-36">
+                <h2 className="text-[22px] font-extrabold text-neutral-900 mb-5">{cat.name}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {catItems.map((item) => (
                     <div 
                       key={item.id} 
                       onClick={() => setSelectedItem(item)}
-                      className="bg-white rounded-2xl p-3 border border-neutral-100 shadow-sm flex gap-3 cursor-pointer hover:border-[var(--brand-color)] hover:shadow-md transition-all active:scale-[0.98]"
+                      className="bg-white rounded-2xl p-4 border border-neutral-100/50 shadow-[0_4px_20px_rgb(0,0,0,0.03)] flex gap-4 cursor-pointer hover:border-[var(--brand-color)]/30 hover:shadow-[0_4px_20px_rgb(0,0,0,0.08)] transition-all active:scale-[0.98] group"
                     >
-                      {item.image_url ? (
-                        <div className="w-24 h-24 flex-shrink-0 bg-neutral-100 rounded-xl overflow-hidden border border-neutral-100">
-                          <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
-                        </div>
-                      ) : (
-                        <div className="w-24 h-24 flex-shrink-0 bg-neutral-100 rounded-xl overflow-hidden border border-neutral-100 relative">
-                          <div className="absolute inset-0 bg-gradient-to-br from-neutral-200 to-neutral-300" />
-                        </div>
-                      )}
-                      <div className="flex-1 flex flex-col justify-between py-0.5">
+                      {/* Flex Container for Text */}
+                      <div className="flex-1 flex flex-col justify-between min-w-0">
                         <div>
-                          <h3 className="font-semibold text-neutral-900 text-sm leading-tight">{item.name}</h3>
+                          <h3 className="font-bold text-neutral-900 text-[15px] leading-tight group-hover:text-[var(--brand-color)] transition-colors">{item.name}</h3>
                           {item.description && (
-                            <p className="text-neutral-500 text-[10px] sm:text-xs mt-1 line-clamp-2 leading-relaxed">{item.description}</p>
+                            <p className="text-neutral-400 text-[13px] mt-1.5 line-clamp-2 leading-relaxed font-medium">{item.description}</p>
                           )}
                         </div>
-                        <div className="font-bold text-[var(--brand-color)] mt-2 text-sm">
-                          R$ {item.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        <div className="mt-3 flex items-center justify-between">
+                          <span className="font-extrabold text-neutral-900 text-base">
+                            R$ {item.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </span>
                         </div>
                       </div>
+
+                      {/* Image - Only rendered if exists */}
+                      {item.image_url && (
+                        <div className="w-[100px] h-[100px] flex-shrink-0 bg-neutral-50 rounded-xl overflow-hidden border border-neutral-100/50 shadow-sm relative">
+                          <img src={item.image_url} alt={item.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                          <div className="absolute bottom-1 right-1 w-6 h-6 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm text-[var(--brand-color)]">
+                            <Plus className="w-4 h-4" />
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Plus button for no-image items */}
+                      {!item.image_url && (
+                         <div className="flex-shrink-0 self-end">
+                            <div className="w-8 h-8 rounded-full bg-neutral-50 border border-neutral-100 flex items-center justify-center text-neutral-400 group-hover:bg-[var(--brand-color)] group-hover:text-white group-hover:border-[var(--brand-color)] transition-all shadow-sm">
+                              <Plus className="w-5 h-5" />
+                            </div>
+                         </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -478,95 +569,194 @@ export function PublicMenuClient({ tenant, categories, items }: { tenant: any, c
 
       {/* Floating Cart Button (Adjusted for Footer) */}
       {cartCount > 0 && (
-        <div className="fixed bottom-20 left-0 right-0 px-4 z-40 max-w-md mx-auto">
+        <div className="fixed bottom-20 left-0 right-0 px-4 z-40 max-w-md mx-auto animate-in slide-in-from-bottom-10 fade-in duration-500">
           <button 
             onClick={() => setShowCheckout(true)}
-            className="w-full h-14 bg-[var(--brand-color)] text-white rounded-2xl shadow-lg flex items-center justify-between px-6 active:scale-95 transition-transform"
+            className="group w-full h-14 bg-[var(--brand-color)] text-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center justify-between px-1.5 py-1.5 active:scale-[0.98] hover:scale-[1.02] transition-all duration-300"
+            style={{ boxShadow: '0 10px 25px -5px var(--brand-color)' }}
           >
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm">
-                {cartCount}
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center font-bold text-sm text-white group-hover:bg-white/30 transition-colors">
+                <ShoppingBag className="w-5 h-5 absolute opacity-30" />
+                <span className="relative z-10">{cartCount}</span>
               </div>
-              <span className="font-semibold">Ver sacola</span>
+              <span className="font-semibold tracking-wide text-[15px]">Ver sacola</span>
             </div>
-            <div className="font-bold">
+            <div className="font-bold text-[15px] pr-4 flex items-center gap-2">
               R$ {cartTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              <ChevronLeft className="w-5 h-5 rotate-180 opacity-50 group-hover:opacity-100 transition-opacity group-hover:translate-x-1 duration-300" />
             </div>
           </button>
         </div>
       )}
 
-      {/* Footer Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-neutral-200 flex items-center justify-around px-4 z-40 max-w-md mx-auto">
-         <button onClick={() => setShowCheckout(false)} className={`flex flex-col items-center justify-center ${!showSearch && !showCheckout ? 'text-[var(--brand-color)]' : 'text-neutral-400'}`}>
-           <Store className="w-5 h-5 mb-1" />
-           <span className="text-[10px] font-medium">Cardápio</span>
-         </button>
-         <button onClick={openSearch} className={`flex flex-col items-center justify-center ${showSearch ? 'text-[var(--brand-color)]' : 'text-neutral-400'}`}>
-           <Search className="w-5 h-5 mb-1" />
-           <span className="text-[10px] font-medium">Busca</span>
-         </button>
-         <button onClick={() => setShowCheckout(true)} className={`flex flex-col items-center justify-center relative ${showCheckout ? 'text-[var(--brand-color)]' : 'text-neutral-400'}`}>
-           <ShoppingBag className="w-5 h-5 mb-1" />
-           <span className="text-[10px] font-medium">Sacola</span>
-           {cartCount > 0 && (
-             <span className="absolute -top-1 -right-2 bg-[var(--brand-color)] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-               {cartCount}
-             </span>
-           )}
-         </button>
+      {/* Floating Footer Navigation (Glassmorphism) */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 z-40 max-w-md mx-auto pointer-events-none">
+        <div className="bg-white/80 backdrop-blur-lg border border-white/40 shadow-[0_8px_32px_rgb(0,0,0,0.08)] rounded-3xl h-16 flex items-center justify-around px-2 pointer-events-auto">
+           <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex flex-col items-center justify-center text-[var(--brand-color)] w-16 h-12 rounded-2xl hover:bg-[var(--brand-color)]/5 transition-colors">
+             <Store className="w-5 h-5 mb-1" />
+             <span className="text-[10px] font-bold">Cardápio</span>
+           </button>
+           <button onClick={() => setSearchOpen(true)} className="flex flex-col items-center justify-center text-neutral-400 w-16 h-12 rounded-2xl hover:bg-neutral-50 hover:text-neutral-600 transition-colors">
+             <Search className="w-5 h-5 mb-1" />
+             <span className="text-[10px] font-bold">Busca</span>
+           </button>
+           <button onClick={() => setShowCheckout(true)} className="flex flex-col items-center justify-center text-neutral-400 w-16 h-12 rounded-2xl hover:bg-neutral-50 hover:text-neutral-600 transition-colors relative">
+             <ShoppingBag className="w-5 h-5 mb-1" />
+             <span className="text-[10px] font-bold">Sacola</span>
+             {cartCount > 0 && (
+               <span className="absolute top-1 right-2 w-2 h-2 bg-[var(--brand-color)] rounded-full animate-pulse shadow-sm">
+               </span>
+             )}
+           </button>
+        </div>
       </div>
 
       {/* Modals */}
       {selectedItem && <ProductModal item={selectedItem} onClose={() => setSelectedItem(null)} />}
-      {showCheckout && <CheckoutModal tenantId={tenant.id} onClose={() => setShowCheckout(false)} />}
+      {showCheckout && <CheckoutModal tenantId={tenant.id} acceptedMethods={{ pix: tenant.accepts_pix !== false, card: tenant.accepts_card !== false, cash: tenant.accepts_cash !== false }} onClose={() => setShowCheckout(false)} />}
+      
+      {/* Sidebar Menu */}
+      {isMenuOpen && (
+        <div className="fixed inset-0 z-50 flex animate-in fade-in duration-200">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setMenuOpen(false)} />
+          <div className="relative w-4/5 max-w-sm bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-left duration-300">
+            <header className="px-6 py-8 border-b border-neutral-100 bg-neutral-50/50 flex flex-col items-center justify-center relative">
+              <button onClick={() => setMenuOpen(false)} className="absolute top-4 right-4 p-2 text-neutral-400 hover:text-neutral-900 bg-white rounded-full shadow-sm">
+                <X className="w-5 h-5" />
+              </button>
+              {tenant.logo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={tenant.logo_url} alt="Logo" className="w-20 h-20 rounded-full object-cover shadow-md border-2 border-white mb-4" />
+              ) : (
+                <div className="w-20 h-20 rounded-full flex items-center justify-center font-bold text-white text-3xl shadow-md border-2 border-white mb-4" style={{ backgroundColor: 'var(--brand-color)' }}>
+                  {tenant.name.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <h2 className="text-lg font-bold text-neutral-900 text-center">{tenant.name}</h2>
+              <p className="text-sm text-neutral-500 mt-1 text-center">Menu de Opções</p>
+            </header>
+            
+            <div className="flex-1 overflow-y-auto py-4">
+              <div className="px-4 space-y-2">
+                <button onClick={() => { setMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }) }} className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl hover:bg-neutral-50 active:scale-95 transition-all text-left">
+                  <div className="w-10 h-10 rounded-full bg-[var(--brand-color)]/10 text-[var(--brand-color)] flex items-center justify-center shrink-0">
+                    <Store className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1">
+                    <span className="font-semibold text-neutral-900 block">Cardápio</span>
+                    <span className="text-xs text-neutral-500">Voltar para os produtos</span>
+                  </div>
+                </button>
+                
+                <button onClick={() => { setMenuOpen(false); setShowCheckout(true); }} className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl hover:bg-neutral-50 active:scale-95 transition-all text-left">
+                  <div className="w-10 h-10 rounded-full bg-neutral-100 text-neutral-600 flex items-center justify-center shrink-0 relative">
+                    <ShoppingBag className="w-5 h-5" />
+                    {totalItems() > 0 && <span className="absolute -top-1 -right-1 w-3 h-3 bg-[var(--brand-color)] rounded-full border-2 border-white"></span>}
+                  </div>
+                  <div className="flex-1">
+                    <span className="font-semibold text-neutral-900 block">Minha Sacola</span>
+                    <span className="text-xs text-neutral-500">{totalItems()} {totalItems() === 1 ? 'item' : 'itens'}</span>
+                  </div>
+                </button>
+              </div>
+
+              <div className="mt-6 px-4">
+                <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-wider ml-4 mb-2">Sobre a Loja</h3>
+                <div className="bg-neutral-50 rounded-2xl p-4 space-y-4 border border-neutral-100">
+                   <div className="flex items-start gap-3">
+                     <Clock className="w-5 h-5 text-neutral-400 shrink-0 mt-0.5" />
+                     <div>
+                       <span className="text-sm font-medium text-neutral-900 block">Horário</span>
+                       <span className="text-xs text-neutral-500 leading-relaxed block">{tenant.opening_hours || 'Não informado'}</span>
+                     </div>
+                   </div>
+                   {tenant.address && (
+                     <div className="flex items-start gap-3">
+                       <MapPin className="w-5 h-5 text-neutral-400 shrink-0 mt-0.5" />
+                       <div>
+                         <span className="text-sm font-medium text-neutral-900 block">Endereço</span>
+                         <span className="text-xs text-neutral-500 leading-relaxed block">{tenant.address}</span>
+                       </div>
+                     </div>
+                   )}
+                </div>
+              </div>
+            </div>
+            
+            <footer className="p-6 border-t border-neutral-100 text-center">
+              <p className="text-xs text-neutral-400 font-medium">Desenvolvido por Atendy AI</p>
+            </footer>
+          </div>
+        </div>
+      )}
       
       {/* Search Modal */}
-      {showSearch && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-white animate-in slide-in-from-bottom sm:slide-in-from-right duration-300 sm:max-w-md sm:right-0 sm:left-auto sm:border-l sm:border-neutral-200">
-          <header className="h-16 flex items-center px-4 border-b border-neutral-100 bg-white sticky top-0 gap-3">
-            <button onClick={closeSearch} className="p-2 -ml-2 text-neutral-600 hover:text-neutral-900">
+      {isSearchOpen && (
+        <div className="fixed inset-0 z-50 flex flex-col bg-white animate-in slide-in-from-bottom duration-300">
+          <header className="h-16 flex items-center px-4 border-b border-neutral-100 bg-white shrink-0">
+            <button onClick={() => { setSearchOpen(false); setSearchQuery(''); }} className="p-2 -ml-2 text-neutral-600 hover:text-neutral-900">
               <ChevronLeft className="w-6 h-6" />
             </button>
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-2.5 w-5 h-5 text-neutral-400" />
+            <div className="flex-1 ml-2 relative">
               <input 
-                autoFocus
                 type="text" 
-                placeholder="Buscar produtos..." 
+                autoFocus
                 value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="w-full bg-neutral-100 rounded-full py-2.5 pl-10 pr-4 outline-none text-sm focus:ring-2 focus:ring-[var(--brand-color)]"
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Busque por pratos ou ingredientes..."
+                className="w-full bg-neutral-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)]/20 transition-all"
               />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 p-1">
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </header>
-          <div className="flex-1 overflow-y-auto bg-neutral-50 p-4 space-y-3">
-            {searchQuery.trim() === '' ? (
-              <div className="text-center text-neutral-500 mt-10 text-sm">
-                Digite algo para buscar no cardápio.
+          
+          <div className="flex-1 overflow-y-auto p-4">
+            {!searchQuery ? (
+              <div className="flex flex-col items-center justify-center h-40 text-neutral-400">
+                <Search className="w-8 h-8 mb-3 opacity-20" />
+                <p className="text-sm">Digite algo para buscar no cardápio</p>
               </div>
             ) : (
-              items
-                .filter(i => i.name.toLowerCase().includes(searchQuery.toLowerCase()) || i.description?.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map((item) => (
-                  <div 
-                    key={item.id} 
-                    onClick={() => { setSelectedItem(item); closeSearch(); }}
-                    className="bg-white rounded-xl p-3 border border-neutral-100 shadow-sm flex gap-3 cursor-pointer hover:border-[var(--brand-color)]"
-                  >
-                    {item.image_url && (
-                      <div className="w-20 h-20 flex-shrink-0 bg-neutral-100 rounded-lg overflow-hidden border border-neutral-100">
-                        <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
-                      </div>
-                    )}
-                    <div className="flex-1 flex flex-col justify-center">
-                      <h3 className="font-bold text-neutral-900 text-sm leading-tight">{item.name}</h3>
-                      <div className="font-bold text-[var(--brand-color)] mt-1 text-sm">
-                        R$ {item.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              <div className="space-y-4">
+                {items
+                  .filter(i => i.name.toLowerCase().includes(searchQuery.toLowerCase()) || (i.description && i.description.toLowerCase().includes(searchQuery.toLowerCase())))
+                  .map(item => (
+                    <div 
+                      key={item.id} 
+                      onClick={() => {
+                        setSelectedItem(item)
+                        setSearchOpen(false)
+                        setSearchQuery('')
+                      }}
+                      className="bg-white rounded-2xl p-4 border border-neutral-100 shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex gap-4 cursor-pointer hover:border-[var(--brand-color)]/30 transition-all active:scale-[0.98]"
+                    >
+                      {item.image_url && (
+                        <div className="w-[80px] h-[80px] flex-shrink-0 bg-neutral-50 rounded-xl overflow-hidden border border-neutral-100/50">
+                          <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      <div className="flex-1 flex flex-col justify-center min-w-0">
+                        <h3 className="font-bold text-neutral-900 text-sm leading-tight truncate">{item.name}</h3>
+                        {item.description && (
+                          <p className="text-neutral-400 text-xs mt-1 truncate">{item.description}</p>
+                        )}
+                        <span className="font-bold text-[var(--brand-color)] text-sm mt-2">
+                          R$ {item.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </span>
                       </div>
                     </div>
+                  ))}
+                {items.filter(i => i.name.toLowerCase().includes(searchQuery.toLowerCase()) || (i.description && i.description.toLowerCase().includes(searchQuery.toLowerCase()))).length === 0 && (
+                  <div className="text-center text-neutral-500 py-10 text-sm">
+                    Nenhum resultado encontrado para "{searchQuery}"
                   </div>
-                ))
+                )}
+              </div>
             )}
           </div>
         </div>

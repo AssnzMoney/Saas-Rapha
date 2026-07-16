@@ -10,11 +10,14 @@ export const getCachedProfile = cache(async () => {
     redirect('/login')
   }
 
-  const { data: profile } = await supabase
+  const { data: profiles } = await supabase
     .from('profiles')
     .select('*, tenants(*)')
     .eq('user_id', user.id)
-    .single()
+    .not('tenant_id', 'is', null)
+    .limit(1)
+
+  const profile = profiles?.[0]
 
   if (!profile || !profile.tenant_id) {
     redirect('/onboarding')

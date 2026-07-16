@@ -7,7 +7,7 @@ export default async function PublicMenuPage({ params }: { params: Promise<{ slu
   const supabase = await createClient()
   
   // Buscar a loja
-  const { data: tenant } = await supabase.from('tenants').select('id, name').eq('slug', slug).single()
+  const { data: tenant } = await supabase.from('tenants').select('id, name, accepts_pix, accepts_card, accepts_cash').eq('slug', slug).single()
   if (!tenant) notFound()
 
   // Buscar categorias da loja

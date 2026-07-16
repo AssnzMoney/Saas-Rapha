@@ -9,11 +9,12 @@ async function getCurrentTenantId() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Não autorizado')
 
-  const { data: profile } = await supabase
+  const { data: profiles } = await supabase
     .from('profiles')
     .select('tenant_id')
     .eq('user_id', user.id)
-    .single()
+    .limit(1)
+  const profile = profiles?.[0]
     
   if (!profile || !profile.tenant_id) throw new Error('Loja não encontrada')
   return profile.tenant_id

@@ -18,7 +18,7 @@ export default function IntegrationsSection({ initialData }: IntegrationsSection
   const steps = [
     {
       title: "Conecte sua Loja ao Mundo",
-      description: "As integrações permitem que sua loja Goomer AI converse com outros aplicativos automaticamente.",
+      description: "As integrações permitem que sua loja Atendy AI converse com outros aplicativos automaticamente.",
       icon: <Plug className="w-8 h-8 text-blue-500" />
     },
     {
