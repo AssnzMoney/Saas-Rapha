@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getCachedProfile } from '@/lib/dal'
-import { MenuManager } from './components'
 import { redirect } from 'next/navigation'
+import { MenuManager } from './components'
 
 export default async function MenuPage() {
   const supabase = await createClient()

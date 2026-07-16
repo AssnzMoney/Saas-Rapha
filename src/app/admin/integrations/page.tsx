@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getCachedProfile } from '@/lib/dal'
-import IntegrationsSection from '@/components/ui/integrations-component'
 import { redirect } from 'next/navigation'
+import IntegrationsSection from '@/components/ui/integrations-component'
 
 export default async function IntegrationsPage() {
   const supabase = await createClient()

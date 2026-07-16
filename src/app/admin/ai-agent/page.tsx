@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { getCachedProfile } from '@/lib/dal'
+import { redirect } from 'next/navigation'
 import { AiAgentClient } from './components'
 import { Bot } from 'lucide-react'
 

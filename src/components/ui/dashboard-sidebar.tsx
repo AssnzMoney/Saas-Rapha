@@ -213,6 +213,7 @@ export function SidebarNav({
   const pathname = usePathname();
   const [internalId, setInternalId] = useState('home');
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   
   useEffect(() => {
     // Find the item that matches the current pathname
@@ -232,62 +233,125 @@ export function SidebarNav({
     }
   }, [pathname]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsSearchOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const currentId = activeId !== undefined ? activeId : internalId;
-  const handleSelect = onSelect || setInternalId;
+  const handleSelect = (id: string) => {
+    if (id === 'search') {
+      setIsSearchOpen(true);
+      return;
+    }
+    if (onSelect) onSelect(id);
+    else setInternalId(id);
+  };
 
   return (
-    <div 
-      data-collapsed={isCollapsed}
-      className={`group/sidebar flex flex-col h-full bg-white border-r border-neutral-200 font-sans transition-all duration-300 relative ${isCollapsed ? 'w-[70px] p-2' : 'w-[260px] p-3'} ${className}`}
-    >
-      <WorkspaceSwitcher selected={activeWorkspace} onSelect={onWorkspaceSelect} />
+    <>
+      <div 
+        data-collapsed={isCollapsed}
+        className={`group/sidebar flex flex-col h-full bg-white border-r border-neutral-200 font-sans transition-all duration-300 relative ${isCollapsed ? 'w-[70px] p-2' : 'w-[260px] p-3'} ${className}`}
+      >
+        <WorkspaceSwitcher selected={activeWorkspace} onSelect={onWorkspaceSelect} />
 
-      <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] flex flex-col gap-4 mt-2">
-        {mockNavGroups.map((group, idx) => (
-          <div key={idx} className="flex flex-col gap-0.5">
-            {group.heading && (
-              <span className="px-2.5 mb-1 text-[11px] font-bold tracking-wider text-neutral-500 uppercase group-data-[collapsed=true]/sidebar:hidden">
-                {group.heading}
+        <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] flex flex-col gap-4 mt-2">
+          {mockNavGroups.map((group, idx) => (
+            <div key={idx} className="flex flex-col gap-0.5">
+              {group.heading && (
+                <span className="px-2.5 mb-1 text-[11px] font-bold tracking-wider text-neutral-500 uppercase group-data-[collapsed=true]/sidebar:hidden">
+                  {group.heading}
+                </span>
+              )}
+              {group.items.map(item => (
+                <NavItem 
+                  key={item.id} 
+                  item={item} 
+                  activeId={currentId} 
+                  onSelect={handleSelect} 
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-auto pt-4 border-t border-border/50 flex flex-col gap-0.5">
+          {mockBottomItems.map(item => (
+            <NavItem 
+              key={item.id} 
+              item={item} 
+              activeId={currentId} 
+              onSelect={handleSelect} 
+            />
+          ))}
+          
+          <button 
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="group flex items-center px-2.5 py-[7px] rounded-[6px] cursor-pointer transition-all duration-200 select-none text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 font-medium"
+          >
+            <div className="flex items-center gap-2.5">
+              {isCollapsed ? (
+                 <PanelLeftOpen size={16} strokeWidth={1.5} className="text-neutral-500 group-hover:text-neutral-800" />
+              ) : (
+                 <PanelLeftClose size={16} strokeWidth={1.5} className="text-neutral-500 group-hover:text-neutral-800" />
+              )}
+              <span className="text-[13px] tracking-wide truncate group-data-[collapsed=true]/sidebar:hidden">
+                Recolher
               </span>
-            )}
-            {group.items.map(item => (
-              <NavItem 
-                key={item.id} 
-                item={item} 
-                activeId={currentId} 
-                onSelect={handleSelect} 
-              />
-            ))}
-          </div>
-        ))}
+            </div>
+          </button>
+        </div>
       </div>
 
-      <div className="mt-auto pt-4 border-t border-border/50 flex flex-col gap-0.5">
-        {mockBottomItems.map(item => (
-          <NavItem 
-            key={item.id} 
-            item={item} 
-            activeId={currentId} 
-            onSelect={handleSelect} 
+      {isSearchOpen && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] sm:pt-[20vh] px-4 animate-in fade-in duration-200">
+          <div 
+            className="fixed inset-0 bg-neutral-900/40 backdrop-blur-sm" 
+            onClick={() => setIsSearchOpen(false)} 
           />
-        ))}
-        
-        <button 
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="group flex items-center px-2.5 py-[7px] rounded-[6px] cursor-pointer transition-all duration-200 select-none text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 font-medium"
-        >
-          <div className="flex items-center gap-2.5">
-            {isCollapsed ? (
-               <PanelLeftOpen size={16} strokeWidth={1.5} className="text-neutral-500 group-hover:text-neutral-800" />
-            ) : (
-               <PanelLeftClose size={16} strokeWidth={1.5} className="text-neutral-500 group-hover:text-neutral-800" />
-            )}
-            <span className="text-[13px] tracking-wide truncate group-data-[collapsed=true]/sidebar:hidden">
-              Recolher
-            </span>
+          <div className="relative bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-neutral-200 overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="flex items-center px-4 border-b border-neutral-100">
+              <Search className="w-5 h-5 text-neutral-400" />
+              <input 
+                autoFocus
+                placeholder="Pesquise por páginas ou configurações..." 
+                className="w-full bg-transparent border-0 focus:ring-0 text-[15px] px-3 py-4 text-neutral-800 placeholder:text-neutral-400 outline-none"
+              />
+              <button onClick={() => setIsSearchOpen(false)} className="p-1 rounded-md text-neutral-400 hover:bg-neutral-100 transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="max-h-[300px] overflow-y-auto p-2 space-y-1 bg-neutral-50/50">
+              {mockNavGroups.flatMap(g => g.items).filter(i => i.id !== 'search').map(item => (
+                <Link 
+                  key={item.id}
+                  href={item.href}
+                  onClick={() => setIsSearchOpen(false)}
+                  className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl hover:bg-neutral-100 text-neutral-700 transition-colors"
+                >
+                  <div className="p-2 bg-white rounded-lg shadow-sm border border-neutral-100 text-neutral-500">
+                    <item.icon className="w-4 h-4" />
+                  </div>
+                  <span className="font-medium text-[14px]">{item.title}</span>
+                </Link>
+              ))}
+            </div>
+            <div className="px-4 py-3 border-t border-neutral-100 bg-neutral-50 text-xs text-neutral-500 flex items-center justify-between">
+              <span>Use as setas para navegar</span>
+              <span className="flex items-center gap-1">
+                <kbd className="px-1.5 py-0.5 rounded border border-neutral-200 bg-white font-sans">esc</kbd> para fechar
+              </span>
+            </div>
           </div>
-        </button>
-      </div>
-    </div>
+        </div>
+      )}
+    </>
   );
 }

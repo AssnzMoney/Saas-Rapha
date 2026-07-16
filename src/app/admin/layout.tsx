@@ -24,7 +24,7 @@ export default async function AdminLayout({
 
   return (
     <div className="flex h-screen bg-neutral-50 overflow-hidden">
-      <aside className="bg-white border-r border-neutral-200 flex-col hidden md:flex h-full transition-all duration-300 z-10">
+      <aside className="bg-white border-r border-neutral-200 flex-col hidden md:flex h-full transition-all duration-300 z-50">
          <SidebarNav 
            className="w-full h-full border-none"
            activeWorkspace={profile?.tenants?.name || 'Sua Loja'}
