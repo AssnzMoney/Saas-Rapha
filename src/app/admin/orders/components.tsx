@@ -43,7 +43,7 @@ export function OrderManager({ initialOrders }: { initialOrders: any[] }) {
     <div className="flex flex-col h-[calc(100vh-120px)]">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 shrink-0">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-neutral-900">Gestor de Pedidos</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-white">Gestor de Pedidos</h1>
           <p className="text-neutral-500 mt-1">Acompanhe e gerencie os pedidos no formato Kanban.</p>
         </div>
         <button 
@@ -61,13 +61,13 @@ export function OrderManager({ initialOrders }: { initialOrders: any[] }) {
           <p className="text-neutral-500 mt-1">Os pedidos feitos pelo seu link público aparecerão aqui.</p>
         </div>
       ) : (
-        <div className="flex-1 flex gap-6 overflow-x-auto pb-4 snap-x">
+        <div className="flex-1 flex gap-6 overflow-x-auto pb-4 snap-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {columns.map(col => {
             const colOrders = orders.filter(o => o.status === col.id)
             const ColIcon = col.icon
             
             return (
-              <div key={col.id} className="min-w-[320px] max-w-[320px] shrink-0 snap-start flex flex-col bg-neutral-100/70 rounded-3xl p-4 border border-neutral-200/50 shadow-inner">
+              <div key={col.id} className="min-w-[320px] max-w-[320px] shrink-0 snap-start flex flex-col bg-neutral-100/70 dark:bg-neutral-900/50 rounded-3xl p-4 border border-neutral-200/50 dark:border-neutral-800/50 shadow-inner">
                 {/* Column Header */}
                 <div className="flex items-center justify-between mb-4 px-1">
                   <div className="flex items-center gap-2">
@@ -90,12 +90,12 @@ export function OrderManager({ initialOrders }: { initialOrders: any[] }) {
                       const itemsText = order.order_items.map((i: any) => `${i.quantity}x ${i.menu_items?.name}`).join(', ')
                       
                       return (
-                        <div key={order.id} className="bg-white p-4 rounded-2xl border border-neutral-200/60 shadow-sm hover:shadow-md transition-shadow animate-in fade-in zoom-in-95 duration-200 cursor-default">
+                        <div key={order.id} className="bg-white dark:bg-neutral-900 p-4 rounded-2xl border border-neutral-200/60 dark:border-neutral-800 shadow-sm hover:shadow-md transition-shadow animate-in fade-in zoom-in-95 duration-200 cursor-default">
                           
                           {/* Card Header */}
                           <div className="flex justify-between items-start mb-3">
-                            <h3 className="font-bold text-neutral-900 leading-tight">{order.customer_name}</h3>
-                            <span className="text-xs font-bold bg-neutral-100 text-neutral-600 px-2 py-1 rounded-lg">
+                            <h3 className="font-bold text-neutral-900 dark:text-white leading-tight">{order.customer_name}</h3>
+                            <span className="text-xs font-bold bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 px-2 py-1 rounded-lg">
                               R$ {order.total_amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                             </span>
                           </div>

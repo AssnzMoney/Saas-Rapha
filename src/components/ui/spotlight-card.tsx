@@ -55,7 +55,7 @@ export function SpotlightCard({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className={cn(
-        "relative rounded-2xl border border-neutral-100 bg-white overflow-hidden shadow-sm transition-shadow hover:shadow-md",
+        "relative rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#1c1c1c] overflow-hidden shadow-sm transition-shadow hover:shadow-md",
         className
       )}
       {...props}
@@ -74,7 +74,7 @@ export function SpotlightCard({
           To make ONLY the border glow, we can use a padding trick, or just let it be a background glow.
           The user image shows a glowing border. Let's make the background white and the wrapper provide the border.
        */}
-      <div className="absolute inset-[1px] rounded-2xl bg-white z-0" />
+      <div className="absolute inset-[1px] rounded-2xl bg-white dark:bg-[#1c1c1c] z-0" />
       
       <div className="relative z-10 h-full w-full">
         {children}

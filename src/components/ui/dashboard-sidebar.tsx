@@ -24,6 +24,7 @@ import {
   Command,
   X
 } from 'lucide-react';
+import { ThemeSwitcher } from './theme-switcher';
 
 export type NavItemData = {
   id: string;
@@ -131,8 +132,8 @@ function NavItem({
         prefetch={true}
         className={`group flex items-center justify-between px-2.5 py-[7px] rounded-[6px] cursor-pointer transition-all duration-200 select-none
           ${isActive 
-            ? 'bg-red-50 text-red-600 font-medium' 
-            : 'text-neutral-600 hover:bg-neutral-100 dark:hover:bg-white/5 hover:text-neutral-900 font-medium'
+            ? 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-500 font-medium' 
+            : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 hover:text-neutral-900 dark:hover:text-neutral-100 font-medium'
           }
         `}
         style={{ paddingLeft: `${level * 12 + 10}px` }}
@@ -258,7 +259,7 @@ export function SidebarNav({
     <>
       <div 
         data-collapsed={isCollapsed}
-        className={`group/sidebar flex flex-col h-full bg-white border-r border-neutral-200 font-sans transition-all duration-300 relative ${isCollapsed ? 'w-[70px] p-2' : 'w-[260px] p-3'} ${className}`}
+        className={`group/sidebar flex flex-col h-full bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800 font-sans transition-all duration-300 relative ${isCollapsed ? 'w-[70px] p-2' : 'w-[260px] p-3'} ${className}`}
       >
         <WorkspaceSwitcher selected={activeWorkspace} onSelect={onWorkspaceSelect} />
 
@@ -307,6 +308,10 @@ export function SidebarNav({
               </span>
             </div>
           </button>
+          
+          <div className="px-2 mt-2 flex justify-center group-data-[collapsed=true]/sidebar:hidden">
+            <ThemeSwitcher />
+          </div>
         </div>
       </div>
 
@@ -316,37 +321,37 @@ export function SidebarNav({
             className="fixed inset-0 bg-neutral-900/40 backdrop-blur-sm" 
             onClick={() => setIsSearchOpen(false)} 
           />
-          <div className="relative bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-neutral-200 overflow-hidden animate-in zoom-in-95 duration-200">
+          <div className="relative bg-white dark:bg-neutral-900 w-full max-w-lg rounded-2xl shadow-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="flex items-center px-4 border-b border-neutral-100">
               <Search className="w-5 h-5 text-neutral-400" />
               <input 
                 autoFocus
                 placeholder="Pesquise por páginas ou configurações..." 
-                className="w-full bg-transparent border-0 focus:ring-0 text-[15px] px-3 py-4 text-neutral-800 placeholder:text-neutral-400 outline-none"
+                className="w-full bg-transparent border-0 focus:ring-0 text-[15px] px-3 py-4 text-neutral-800 dark:text-neutral-100 placeholder:text-neutral-400 outline-none"
               />
-              <button onClick={() => setIsSearchOpen(false)} className="p-1 rounded-md text-neutral-400 hover:bg-neutral-100 transition-colors">
+              <button onClick={() => setIsSearchOpen(false)} className="p-1 rounded-md text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="max-h-[300px] overflow-y-auto p-2 space-y-1 bg-neutral-50/50">
+            <div className="max-h-[300px] overflow-y-auto p-2 space-y-1 bg-neutral-50/50 dark:bg-neutral-950/50">
               {mockNavGroups.flatMap(g => g.items).filter(i => i.id !== 'search').map(item => (
                 <Link 
                   key={item.id}
                   href={item.href}
                   onClick={() => setIsSearchOpen(false)}
-                  className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl hover:bg-neutral-100 text-neutral-700 transition-colors"
+                  className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800/50 text-neutral-700 dark:text-neutral-300 transition-colors"
                 >
-                  <div className="p-2 bg-white rounded-lg shadow-sm border border-neutral-100 text-neutral-500">
+                  <div className="p-2 bg-white dark:bg-neutral-800 rounded-lg shadow-sm border border-neutral-100 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400">
                     <item.icon className="w-4 h-4" />
                   </div>
                   <span className="font-medium text-[14px]">{item.title}</span>
                 </Link>
               ))}
             </div>
-            <div className="px-4 py-3 border-t border-neutral-100 bg-neutral-50 text-xs text-neutral-500 flex items-center justify-between">
+            <div className="px-4 py-3 border-t border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/50 text-xs text-neutral-500 dark:text-neutral-400 flex items-center justify-between">
               <span>Use as setas para navegar</span>
               <span className="flex items-center gap-1">
-                <kbd className="px-1.5 py-0.5 rounded border border-neutral-200 bg-white font-sans">esc</kbd> para fechar
+                <kbd className="px-1.5 py-0.5 rounded border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 font-sans">esc</kbd> para fechar
               </span>
             </div>
           </div>

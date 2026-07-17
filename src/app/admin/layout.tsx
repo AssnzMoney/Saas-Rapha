@@ -23,8 +23,8 @@ export default async function AdminLayout({
   const { profile } = await getCachedProfile()
 
   return (
-    <div className="flex h-screen bg-neutral-50 overflow-hidden">
-      <aside className="bg-white border-r border-neutral-200 flex-col hidden md:flex h-full transition-all duration-300 z-50">
+    <div className="flex h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 overflow-hidden transition-colors duration-300">
+      <aside className="bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800 flex-col hidden md:flex h-full transition-all duration-300 z-50">
          <SidebarNav 
            className="w-full h-full border-none"
            activeWorkspace={profile?.tenants?.name || 'Sua Loja'}
@@ -32,9 +32,9 @@ export default async function AdminLayout({
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto bg-neutral-50/50 relative">
-        <div className="dot-pattern" />
-        <header className="relative z-10 h-16 bg-white/80 backdrop-blur-sm border-b border-neutral-200 flex items-center justify-between px-8 md:hidden">
+      <main className="flex-1 overflow-y-auto bg-neutral-50/50 dark:bg-neutral-950/50 relative transition-colors duration-300">
+        <div className="dot-pattern opacity-60 dark:opacity-20" />
+        <header className="relative z-10 h-16 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between px-8 md:hidden transition-colors duration-300">
             <span className="font-bold text-lg text-neutral-900">Atendy AI</span>
             {/* Mobile menu button would go here */}
         </header>

@@ -67,24 +67,20 @@ export function RecentCustomers() {
       {recentCustomers.map((customer) => (
         <div key={customer.id} className="flex items-center justify-between group cursor-pointer">
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${customer.color}`}>
+            <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-500/10 flex items-center justify-center text-red-600 dark:text-red-500 font-bold text-sm shrink-0">
               {customer.initials}
             </div>
             <div>
-              <p className="text-sm font-semibold text-neutral-900 group-hover:text-red-600 transition-colors">
-                {customer.name}
-              </p>
-              <p className="text-xs text-neutral-500">
-                {customer.items}
-              </p>
+              <p className="text-sm font-bold text-neutral-900 dark:text-neutral-100">{customer.name}</p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate">{customer.items}</p>
             </div>
           </div>
-          <div className="text-right">
-            <p className="text-sm font-bold text-neutral-900 flex items-center justify-end gap-1">
+          <div className="text-right shrink-0">
+            <p className="text-sm font-bold text-neutral-900 dark:text-neutral-100 flex items-center gap-1 justify-end">
               {customer.amount}
               <ArrowUpRight className="w-3 h-3 text-neutral-400 group-hover:text-red-500 transition-colors" />
             </p>
-            <p className="text-xs text-neutral-400">
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">
               {customer.time}
             </p>
           </div>

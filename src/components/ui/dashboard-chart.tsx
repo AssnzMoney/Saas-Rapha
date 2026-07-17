@@ -3,6 +3,8 @@
 import React, { PureComponent } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
+import { useTheme } from 'next-themes';
+
 const data = [
   { name: 'Seg', faturamento: 1250, pedidos: 34 },
   { name: 'Ter', faturamento: 1100, pedidos: 28 },
@@ -14,6 +16,9 @@ const data = [
 ];
 
 export function DashboardChart() {
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
+
   return (
     <div className="w-full h-full min-h-[350px]">
       <ResponsiveContainer width="100%" height="100%">
@@ -32,7 +37,7 @@ export function DashboardChart() {
               <stop offset="95%" stopColor="#dc2626" stopOpacity={0}/>
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e5e5" />
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? '#262626' : '#e5e5e5'} />
           <XAxis 
             dataKey="name" 
             axisLine={false} 
@@ -47,7 +52,13 @@ export function DashboardChart() {
             tickFormatter={(value) => `R$${value}`}
           />
           <Tooltip 
-            contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' }}
+            contentStyle={{ 
+              borderRadius: '8px', 
+              border: isDark ? '1px solid #262626' : 'none', 
+              backgroundColor: isDark ? '#1c1c1c' : '#ffffff',
+              color: isDark ? '#f5f5f5' : '#000000',
+              boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' 
+            }}
             formatter={(value: number) => [`R$ ${value}`, 'Faturamento']}
           />
           <Area 

@@ -18,7 +18,7 @@ export default async function AdminDashboard() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <h1 className="text-2xl font-bold tracking-tight text-neutral-900 flex items-center gap-2">
+      <h1 className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100 flex items-center gap-2">
         Bem-vindo, {userName}
         <Sparkles className="w-5 h-5 text-red-500" />
       </h1>
@@ -30,12 +30,12 @@ export default async function AdminDashboard() {
         <SpotlightCard>
           <div className="flex flex-col h-full p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-neutral-500">Pedidos Hoje</h3>
-              <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
+              <h3 className="text-sm font-medium text-neutral-500 dark:text-neutral-400">Pedidos Hoje</h3>
+              <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-500/10 flex items-center justify-center">
                 <ShoppingBag className="w-5 h-5 text-red-600" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-neutral-900">26</p>
+            <p className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">26</p>
             <div className="mt-2 flex items-center text-sm">
               <TrendingUp className="w-4 h-4 text-emerald-500 mr-1" />
               <span className="text-emerald-500 font-medium">12%</span>
@@ -48,12 +48,12 @@ export default async function AdminDashboard() {
         <SpotlightCard>
           <div className="flex flex-col h-full p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-neutral-500">Faturamento</h3>
-              <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
+              <h3 className="text-sm font-medium text-neutral-500 dark:text-neutral-400">Faturamento</h3>
+              <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-500/10 flex items-center justify-center">
                 <TrendingUp className="w-5 h-5 text-red-600" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-neutral-900">R$ 1.250,00</p>
+            <p className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">R$ 1.250,00</p>
             <div className="mt-2 flex items-center text-sm">
               <TrendingUp className="w-4 h-4 text-emerald-500 mr-1" />
               <span className="text-emerald-500 font-medium">8%</span>
@@ -66,12 +66,12 @@ export default async function AdminDashboard() {
         <SpotlightCard>
           <div className="flex flex-col h-full p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-neutral-500">Conversas da IA</h3>
-              <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
+              <h3 className="text-sm font-medium text-neutral-500 dark:text-neutral-400">Conversas da IA</h3>
+              <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-500/10 flex items-center justify-center">
                 <MessageCircle className="w-5 h-5 text-red-600" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-neutral-900">142</p>
+            <p className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">142</p>
             <div className="mt-2 flex items-center text-sm">
                <TrendingUp className="w-4 h-4 text-emerald-500 mr-1" />
                <span className="text-emerald-500 font-medium">24%</span>
@@ -84,12 +84,12 @@ export default async function AdminDashboard() {
         <SpotlightCard>
           <div className="flex flex-col h-full p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-neutral-500">Taxa de Conversão</h3>
-              <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
+              <h3 className="text-sm font-medium text-neutral-500 dark:text-neutral-400">Taxa de Conversão</h3>
+              <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-500/10 flex items-center justify-center">
                 <ArrowUpRight className="w-5 h-5 text-red-600" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-neutral-900">18.3%</p>
+            <p className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">18.3%</p>
             <div className="mt-2 flex items-center text-sm">
                <TrendingUp className="w-4 h-4 text-emerald-500 mr-1" />
                <span className="text-emerald-500 font-medium">2%</span>
@@ -108,10 +108,10 @@ export default async function AdminDashboard() {
           <div className="flex flex-col h-full p-6">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-lg font-bold text-neutral-900">Faturamento e Pedidos</h2>
-                <p className="text-sm text-neutral-500">Acompanhamento dos últimos 7 dias</p>
+                <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Faturamento e Pedidos</h2>
+                <p className="text-sm text-neutral-500 dark:text-neutral-400">Acompanhamento dos últimos 7 dias</p>
               </div>
-              <select className="bg-neutral-50 border border-neutral-200 text-neutral-700 text-sm rounded-lg px-3 py-1.5 outline-none focus:border-red-500">
+              <select className="bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-200 text-sm rounded-lg px-3 py-1.5 outline-none focus:border-red-500">
                 <option>Últimos 7 dias</option>
                 <option>Últimos 30 dias</option>
               </select>
@@ -126,14 +126,14 @@ export default async function AdminDashboard() {
           <div className="flex flex-col h-full p-6">
              <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-lg font-bold text-neutral-900">Vendas Recentes</h2>
-                <p className="text-sm text-neutral-500">Pedidos fechados pela IA</p>
+                <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Vendas Recentes</h2>
+                <p className="text-sm text-neutral-500 dark:text-neutral-400">Pedidos fechados pela IA</p>
               </div>
             </div>
             
             <RecentCustomers />
             
-            <button className="w-full mt-6 py-2.5 bg-neutral-50 hover:bg-neutral-100 text-neutral-600 font-medium text-sm rounded-xl transition-colors border border-neutral-200">
+            <button className="w-full mt-6 py-2.5 bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 text-neutral-600 dark:text-neutral-300 font-medium text-sm rounded-xl transition-colors border border-neutral-200 dark:border-neutral-700">
               Ver todos os pedidos
             </button>
           </div>
